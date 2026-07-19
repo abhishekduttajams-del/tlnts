@@ -1,0 +1,2501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>TLNTS · Creator Management</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- GSAP & Lenis -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+  <style>
+    /* ===== HITCHCUT FONT – self‑hosted with fallback ===== */
+    @font-face {
+      font-family: 'Hitchcut';
+      src: url('Hitchcut.ttf') format('truetype'),
+           url('Hitchcut.otf') format('opentype');
+      font-weight: 800;
+      font-style: normal;
+      font-display: swap;
+    }
+    .font-hitchcut {
+      font-family: 'Hitchcut', 'Bebas Neue', 'Inter', sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+    }
+    .font-hitchcut-lower {
+      font-family: 'Hitchcut', 'Bebas Neue', 'Inter', sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: lowercase;
+    }
+
+    /* ===== DESIGN SYSTEM ===== */
+    :root {
+      --brand-blue: #1800AD;
+      --ink-black: #150C16;
+      --paper-white: #ffffff;
+      --yellow: #fad02c;
+      --surface-black: #150C16;
+      --primary-text: #ffffff;
+      --secondary-text: #ffffff;
+      --muted-text: rgba(255,255,255,0.6);
+      --border-default: rgba(255,255,255,0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { overflow-x: hidden; }
+    body {
+      background: var(--ink-black);
+      color: var(--primary-text);
+      font-family: 'Space Grotesk', sans-serif;
+      margin: 0;
+      overflow-x: hidden;
+      cursor: none !important;
+    }
+
+    * { cursor: none !important; }
+
+    a, button, .comet-card, .campaign-comet-card, .contact-input, .dock-icon, .magnetic-btn, .service-word, .footer-link {
+      cursor: none !important;
+    }
+
+    /* ============================================================ */
+    /* CUSTOM SCROLLBAR – desktop only (hidden on mobile) */
+    /* ============================================================ */
+    @media (hover: hover) {
+      ::-webkit-scrollbar { width: 16px; }
+      ::-webkit-scrollbar-track { background: rgba(24,0,173,0.1); border-radius: 10px; }
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #fad02c 0%, #1800AD 50%, #fad02c 100%);
+        border-radius: 10px;
+        border: 3px solid rgba(24,0,173,0.1);
+        box-shadow: 0 0 20px rgba(250,208,44,0.4);
+        transition: all 0.3s ease;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        box-shadow: 0 0 30px rgba(250,208,44,0.6);
+        border-color: rgba(250,208,44,0.3);
+      }
+      ::-webkit-scrollbar-thumb:active {
+        background: linear-gradient(180deg, #1800AD 0%, #fad02c 50%, #1800AD 100%);
+        box-shadow: 0 0 40px rgba(250,208,44,0.8);
+      }
+      * {
+        scrollbar-width: thick;
+        scrollbar-color: #1800AD rgba(24,0,173,0.1);
+      }
+    }
+
+    /* ===== CUSTOM CURSOR – hidden on touch devices ===== */
+    #cursor-container {
+      position: fixed !important;
+      pointer-events: none;
+      z-index: 99999999 !important;
+      width: 0;
+      height: 0;
+      transform: translate(0, 0);
+      will-change: transform;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    #cursor-container.visible { opacity: 1; }
+    #cursor-svg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 38px;
+      height: 38px;
+      will-change: transform, filter;
+      transition: filter 0.25s ease;
+      filter: drop-shadow(0 0 0px rgba(24,0,173,0));
+    }
+    #cursor-svg path {
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 3.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: stroke-width 0.25s ease;
+    }
+    #cursor-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(24,0,173,0);
+      filter: blur(18px);
+      will-change: transform, opacity, background;
+      transition: background 0.3s ease, opacity 0.3s ease;
+      pointer-events: none;
+      opacity: 0;
+    }
+    #cursor.hover #cursor-glow { opacity: 0.4; background: rgba(24,0,173,0.4); }
+    #cursor.hover #cursor-svg { filter: drop-shadow(0 0 25px rgba(24,0,173,0.3)); }
+    #cursor.hover #cursor-svg path { stroke-width: 4; }
+    #cursor.click #cursor-svg { transition: filter 0.1s ease; }
+    .cursor-trail {
+      position: fixed !important;
+      pointer-events: none;
+      z-index: 99998;
+      opacity: 0.15;
+      transform: translate(-50%, -50%) scale(0.7);
+      filter: blur(3px);
+      will-change: transform, opacity;
+    }
+    .cursor-trail svg {
+      width: 34px;
+      height: 34px;
+    }
+    .cursor-trail svg path {
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    /* Hide custom cursor on touch devices */
+        @media (max-width: 768px) {
+      /* Cursor and toggle are now visible on mobile */
+      body { cursor: auto !important; }
+      a, button, .comet-card, .contact-input { cursor: pointer !important; }
+      * { cursor: auto !important; }
+    }
+
+    /* ===== LOADER OVERLAY ===== */
+    #loader-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      background: #050505;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: all;
+      transition: opacity 0.6s ease;
+      overflow: hidden;
+    }
+    #loader-overlay.hidden { opacity: 0; pointer-events: none; }
+    .loader-logo-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      padding: 0 20px;
+    }
+    .loader-letter {
+      font-family: 'Hitchcut', 'Bebas Neue', sans-serif;
+      font-weight: 800;
+      font-size: clamp(90px, 22vw, 280px);
+      color: #ffffff;
+      display: inline-block;
+      transform: scale(0);
+      opacity: 0;
+      will-change: transform, opacity;
+      letter-spacing: 0;
+      line-height: 1;
+      text-shadow: 0 0 0px rgba(24,0,173,0);
+      transition: none;
+      position: relative;
+    }
+    .loader-letter.shadow-pulse { text-shadow: 0 0 30px rgba(24,0,173,0.3); }
+    .loader-subtitle {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(14px, 2vw, 28px);
+      color: #D8D8D8;
+      letter-spacing: 6px;
+      text-transform: lowercase;
+      opacity: 0;
+      transform: translateY(25px);
+      margin-top: 12px;
+      will-change: transform, opacity;
+    }
+
+    /* ===== SOUND PERMISSION DIALOG – premium overlay ===== */
+    #sound-permission-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999999 !important;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    #sound-permission-overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+    #sound-permission-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .sound-permission-card {
+      background: rgba(21, 12, 22, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: clamp(2rem, 4vw, 4rem);
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
+      transform: scale(0.92) translateY(20px);
+      transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    #sound-permission-overlay.visible .sound-permission-card {
+      transform: scale(1) translateY(0);
+    }
+    .sound-permission-card .icon-wrap {
+      font-size: 3.5rem;
+      color: #fad02c;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .sound-permission-card h2 {
+      font-family: 'Hitchcut', 'Bebas Neue', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+    .sound-permission-card p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    .sound-permission-card .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    @media (min-width: 480px) {
+      .sound-permission-card .btn-group {
+        flex-direction: row;
+        justify-content: center;
+      }
+    }
+    .sound-permission-card .btn-allow {
+      background: #fad02c;
+      color: #000;
+      border: none;
+      padding: 0.9rem 2.5rem;
+      border-radius: 9999px;
+      font-family: 'Hitchcut', 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      min-width: 160px;
+    }
+    .sound-permission-card .btn-allow:hover {
+      background: #fff;
+      transform: scale(1.05);
+      box-shadow: 0 10px 40px rgba(250, 208, 44, 0.3);
+    }
+    .sound-permission-card .btn-allow:active {
+      transform: scale(0.95);
+    }
+    .sound-permission-card .btn-deny {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.9rem 2.5rem;
+      border-radius: 9999px;
+      font-family: 'Hitchcut', 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      min-width: 160px;
+    }
+    .sound-permission-card .btn-deny:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: scale(1.03);
+    }
+    .sound-permission-card .btn-deny:active {
+      transform: scale(0.95);
+    }
+    @media (max-width: 480px) {
+      .sound-permission-card {
+        padding: 2rem 1.5rem;
+        border-radius: 20px;
+      }
+      .sound-permission-card .btn-allow,
+      .sound-permission-card .btn-deny {
+        width: 100%;
+        min-width: unset;
+      }
+    }
+    #sound-permission-overlay * {
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+
+    /* ===== BACKGROUND LAYERS ===== */
+    .bg-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .bg-layer-1 { background: var(--ink-black); }
+    .bg-layer-2 { background: radial-gradient(circle at 40% 20%, rgba(24,0,173,0.35) 0%, transparent 60%); }
+    .bg-layer-3 { background: radial-gradient(circle at 80% 70%, rgba(0,47,167,0.15) 0%, transparent 50%); }
+    .bg-layer-4 { background: radial-gradient(circle at 20% 80%, rgba(0,47,167,0.06) 0%, transparent 40%); }
+    .bg-layer-5 { opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 256px 256px; }
+    .bg-blob { position: fixed; width: 700px; height: 700px; border-radius: 50%; background: rgba(24,0,173,0.06); filter: blur(150px); top: 10%; left: 20%; z-index: 0; pointer-events: none; will-change: transform; }
+    .bg-blob-2 { position: fixed; width: 500px; height: 500px; border-radius: 50%; background: rgba(0,47,167,0.05); filter: blur(120px); bottom: 10%; right: 20%; z-index: 0; pointer-events: none; will-change: transform; }
+
+
+    /* ===== FLOATING OBJECTS ===== */
+    .float-object { position: fixed; pointer-events: none; z-index: 2; font-size: 3rem; opacity: 0.15; will-change: transform; user-select: none; }
+    @media (max-width: 768px) { .float-object { font-size: 2rem; opacity: 0.1; } }
+
+    /* ===== BUTTONS ===== */
+    .btn-primary {
+      background: #fad02c;
+      color: var(--ink-black);
+      border: none;
+      transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      box-shadow: 0 10px 40px rgba(250,208,44,0.35);
+      position: relative;
+      overflow: hidden;
+      cursor: none !important;
+    }
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .btn-primary:hover::after { opacity: 1; }
+    .btn-primary:hover {
+      background: var(--brand-blue);
+      color: var(--paper-white);
+      transform: scale(1.05);
+      box-shadow: 0 15px 60px rgba(24,0,173,0.5);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--paper-white);
+      border: 1px solid rgba(250,208,44,0.4);
+      transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      position: relative;
+      overflow: hidden;
+      cursor: none !important;
+    }
+    .btn-secondary::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #fad02c;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: -1;
+    }
+    .btn-secondary:hover {
+      background: #fad02c;
+      color: var(--ink-black);
+      border-color: #fad02c;
+      transform: scale(1.05);
+      box-shadow: 0 10px 40px rgba(250,208,44,0.3);
+    }
+    .btn-secondary:hover::after { opacity: 1; }
+    .magnetic-btn { will-change: transform; transition: transform 0.15s cubic-bezier(0.23, 1, 0.32, 1); cursor: none !important; }
+
+    /* ===== 3D POP-OUT COMET CARD ===== */
+    .comet-card {
+      position: relative;
+      background: var(--surface-black);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 24px;
+      padding: 16px;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.15s ease-out, border-color 0.4s ease, box-shadow 0.4s ease;
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8);
+      will-change: transform;
+      width: 100%;
+    }
+    .comet-card:hover {
+      border-color: rgba(250,208,44,0.4);
+      box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9),
+                  0 0 50px -10px rgba(250,208,44,0.2);
+    }
+    .comet-glow {
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      pointer-events: none;
+      z-index: 5;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      background: radial-gradient(250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(250,208,44,0.15), transparent 80%);
+    }
+    .comet-card:hover .comet-glow { opacity: 1; }
+    .image-viewport {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      overflow: hidden;
+      border-radius: 16px;
+      background: #000;
+      transform: translateZ(20px);
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    .card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      contrast: 1.2;
+      brightness: 0.8;
+      transition: transform 0.5s ease;
+      display: block;
+    }
+    .comet-card:hover .card-image { transform: scale(1.05); }
+    .pop-out-text-wrap {
+      position: absolute;
+      top: 45%;
+      left: -10px;
+      right: -10px;
+      z-index: 10;
+      pointer-events: none;
+      text-align: center;
+      transform: translateZ(75px);
+      filter: drop-shadow(0 15px 15px rgba(0, 0, 0, 0.7));
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .comet-card:hover .pop-out-text-wrap { transform: translateZ(95px) scale(1.03); }
+    .pop-text-main {
+      font-size: 52px;
+      line-height: 1;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      margin: 0;
+      font-family: 'Hitchcut', 'Bebas Neue', sans-serif;
+      font-weight: 800;
+      background: linear-gradient(180deg, #ffffff 30%, #a1a1aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .pop-text-sub {
+      font-size: 14px;
+      color: #fad02c;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      margin-top: 4px;
+      font-weight: 900;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .card-footer {
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: rgba(255,255,255,0.5);
+      padding: 4px;
+      font-size: 11px;
+      font-family: monospace;
+      letter-spacing: 1px;
+      transform: translateZ(40px);
+      position: relative;
+      z-index: 6;
+    }
+    .card-id { color: #ffffff; background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
+
+    /* Campaign card variant */
+    .campaign-comet-card {
+      position: relative;
+      background: var(--surface-black);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 24px;
+      padding: 16px;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.15s ease-out, border-color 0.4s ease, box-shadow 0.4s ease;
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8);
+      will-change: transform;
+      width: 100%;
+    }
+    .campaign-comet-card:hover {
+      border-color: rgba(250,208,44,0.4);
+      box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9), 0 0 50px -10px rgba(250,208,44,0.2);
+    }
+    .campaign-comet-card .comet-glow {
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      pointer-events: none;
+      z-index: 5;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      background: radial-gradient(250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(250,208,44,0.15), transparent 80%);
+    }
+    .campaign-comet-card:hover .comet-glow { opacity: 1; }
+    .campaign-comet-card .image-viewport { aspect-ratio: 16 / 9; transform: translateZ(20px); }
+    .campaign-comet-card .pop-out-text-wrap { top: 30%; transform: translateZ(75px); }
+    .campaign-comet-card:hover .pop-out-text-wrap { transform: translateZ(95px) scale(1.03); }
+    .campaign-comet-card .pop-text-main { font-size: 40px; }
+    .campaign-comet-card .pop-text-sub { font-size: 12px; letter-spacing: 4px; }
+
+    /* Dock overlay */
+    .card-dock-overlay {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      z-index: 15;
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.05);
+      transform: translateZ(60px);
+      pointer-events: auto;
+    }
+    .dock-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--secondary-text);
+      font-size: 1rem;
+      transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      cursor: pointer;
+      transform: scale(0.8);
+      opacity: 0;
+      pointer-events: none;
+      text-decoration: none;
+    }
+    .comet-card:hover .dock-icon,
+    .campaign-comet-card:hover .dock-icon {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+    .dock-icon:hover {
+      background: #fad02c;
+      color: var(--ink-black);
+      transform: scale(1.2) !important;
+      box-shadow: 0 0 30px rgba(250,208,44,0.4);
+    }
+    .comet-card:hover .dock-icon:nth-child(1) { transition-delay: 0.05s; }
+    .comet-card:hover .dock-icon:nth-child(2) { transition-delay: 0.10s; }
+    .comet-card:hover .dock-icon:nth-child(3) { transition-delay: 0.15s; }
+    .comet-card:hover .dock-icon:nth-child(4) { transition-delay: 0.20s; }
+    .comet-card:hover .dock-icon:nth-child(5) { transition-delay: 0.25s; }
+    .campaign-comet-card:hover .dock-icon:nth-child(1) { transition-delay: 0.05s; }
+    .campaign-comet-card:hover .dock-icon:nth-child(2) { transition-delay: 0.10s; }
+    .campaign-comet-card:hover .dock-icon:nth-child(3) { transition-delay: 0.15s; }
+    .campaign-comet-card:hover .dock-icon:nth-child(4) { transition-delay: 0.20s; }
+    .campaign-comet-card:hover .dock-icon:nth-child(5) { transition-delay: 0.25s; }
+
+    /* ===== MARQUEE (S‑shaped stack) ===== */
+    .marquee-track {
+      display: flex;
+      white-space: nowrap;
+      gap: 4rem;
+      font-family: 'Hitchcut', 'Bebas Neue', 'Inter', sans-serif;
+      font-weight: 800;
+      font-size: 2rem;
+      color: rgba(255,255,255,0.55);
+      text-transform: uppercase;
+      will-change: transform;
+    }
+    @media (min-width: 768px) {
+      .marquee-track { font-size: 3.5rem; gap: 6rem; }
+    }
+    .marquee-track span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: none;
+      will-change: transform;
+    }
+    .marquee-track span::before { content: '✦'; color: #fad02c; font-size: 0.7em; }
+
+    .contact-input {
+      background: var(--surface-black);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--paper-white);
+      padding: 1.25rem 2rem;
+      border-radius: 9999px;
+      transition: all 0.3s ease;
+      outline: none;
+      width: 100%;
+      cursor: none !important;
+    }
+    .contact-input:focus { border-color: #fad02c; box-shadow: 0 0 30px rgba(250,208,44,0.15); }
+    .contact-input::placeholder { color: var(--muted-text); }
+    .contact-button { flex-shrink: 0; min-width: 120px; }
+    .contact-form { overflow: visible !important; }
+
+    .footer-link {
+      color: var(--secondary-text);
+      transition: all 0.3s ease;
+      text-decoration: none;
+      position: relative;
+      font-weight: 500;
+      cursor: none !important;
+    }
+    .footer-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: #fad02c;
+      transition: width 0.3s ease;
+    }
+    .footer-link:hover { color: var(--paper-white); }
+    .footer-link:hover::after { width: 100%; }
+
+    ::-webkit-scrollbar { width: 4px; background: var(--ink-black); }
+    ::-webkit-scrollbar-thumb { background: #fad02c; border-radius: 10px; }
+
+    @media (max-width: 640px) { .hero-title { font-size: 58px !important; } .hero-who { font-size: 120px !important; letter-spacing: 10px !important; } }
+    @media (max-width: 768px) { .dock-icon { width: 32px; height: 32px; font-size: 1rem; } }
+
+    .service-word {
+      font-family: 'Hitchcut', 'Bebas Neue', 'Inter', sans-serif;
+      font-weight: 800;
+      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      cursor: default;
+      text-transform: uppercase;
+      color: var(--primary-text);
+      text-shadow: 0 0 20px rgba(24,0,173,0.2);
+    }
+    .service-word:hover { color: #fad02c; transform: scale(1.02); text-shadow: 0 0 60px rgba(250,208,44,0.3); }
+
+    .parallax-hero { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+    .parallax-hero img {
+      position: absolute;
+      border-radius: 16px;
+      object-fit: cover;
+      will-change: transform;
+      box-shadow: 0 20px 60px rgba(24,0,173,0.3);
+      border: 2px solid rgba(255,255,255,0.05);
+    }
+    /* Adjust floating images for mobile – fewer, smaller */
+    .parallax-hero img:nth-child(1) { top: 12%; left: 4%; width: 200px; height: 140px; transform: rotate(-3deg); }
+    .parallax-hero img:nth-child(2) { top: 28%; right: 6%; width: 180px; height: 120px; transform: rotate(4deg); }
+    .parallax-hero img:nth-child(3) { bottom: 22%; left: 8%; width: 220px; height: 150px; transform: rotate(2deg); }
+    .parallax-hero img:nth-child(4) { bottom: 32%; right: 10%; width: 160px; height: 110px; transform: rotate(-5deg); }
+    .parallax-hero img:nth-child(5) { top: 50%; left: 30%; width: 190px; height: 130px; transform: rotate(6deg); }
+    .parallax-hero img:nth-child(6) { top: 6%; left: 42%; width: 140px; height: 100px; transform: rotate(-2deg); }
+    .parallax-hero img:nth-child(7) { bottom: 12%; right: 35%; width: 210px; height: 140px; transform: rotate(3deg); }
+    /* Hide some images on small screens to reduce clutter */
+    @media (max-width: 768px) {
+      .parallax-hero img:nth-child(1) { width: 120px; height: 85px; }
+      .parallax-hero img:nth-child(2) { width: 100px; height: 70px; }
+      .parallax-hero img:nth-child(3) { width: 130px; height: 90px; }
+      .parallax-hero img:nth-child(4) { width: 90px; height: 65px; }
+      .parallax-hero img:nth-child(5) { width: 110px; height: 75px; }
+      .parallax-hero img:nth-child(6) { width: 80px; height: 60px; }
+      .parallax-hero img:nth-child(7) { width: 120px; height: 85px; }
+    }
+    @media (max-width: 480px) {
+  .parallax-hero img:nth-child(1) { width: 70px; height: 50px; }
+  .parallax-hero img:nth-child(2) { width: 65px; height: 45px; }
+  .parallax-hero img:nth-child(3) { width: 80px; height: 55px; }
+  .parallax-hero img:nth-child(4) { width: 60px; height: 40px; }
+  .parallax-hero img:nth-child(5) { width: 70px; height: 48px; }
+  .parallax-hero img:nth-child(6) { width: 55px; height: 38px; }
+  .parallax-hero img:nth-child(7) { width: 70px; height: 50px; }
+}
+
+    .section-padding { padding-top: clamp(60px, 10vh, 140px); padding-bottom: clamp(60px, 10vh, 140px); }
+
+    .about-text { font-size: clamp(1rem, 1.5vw, 1.25rem); line-height: 1.8; color: var(--secondary-text); }
+    .about-text strong { color: var(--paper-white); font-weight: 600; }
+    .about-text .highlight { color: #fad02c; font-weight: 500; }
+    .about-signature {
+      font-family: 'Hitchcut', 'Bebas Neue', 'Inter', sans-serif;
+      color: var(--secondary-text);
+      letter-spacing: 2px;
+    }
+    .about-signature span { color: #fad02c; }
+
+    .parallax-parent { position: absolute; width: 100%; height: 100%; clip: rect(0, auto, auto, 0); top: 0; left: 0; pointer-events: none; z-index: 0; }
+    .parallax-child { position: fixed; top: 0; left: 0; height: 150%; width: 100%; will-change: transform; pointer-events: none; }
+    .parallax-child img, .parallax-child .parallax-layer { width: 100%; height: 100%; object-fit: cover; }
+    .parallax-layer {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30vw;
+      opacity: 0.04;
+      color: #fad02c;
+      pointer-events: none;
+    }
+    .section-content { position: relative; z-index: 10; }
+
+    #hero .hero-inner { opacity: 0; transform: scale(0.95); }
+    #hero .hero-inner.visible { opacity: 1; transform: scale(1); transition: opacity 1.2s ease, transform 1.2s cubic-bezier(0.23, 1, 0.32, 1); }
+    .hero-glow { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; opacity: 0; transition: opacity 1.5s ease; }
+    .hero-glow.visible { opacity: 1; }
+    .hero-glow-1 { width: 400px; height: 400px; background: rgba(24,0,173,0.3); top: 10%; left: 10%; }
+    .hero-glow-2 { width: 300px; height: 300px; background: rgba(0,47,167,0.2); top: 20%; right: 20%; }
+    .hero-glow-3 { width: 350px; height: 350px; background: rgba(0,47,167,0.1); bottom: 10%; left: 30%; }
+
+    .scroll-indicator { animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 0.3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(8px); } }
+
+    /* ===== FLOATING RECTANGLE ANIMATIONS – for join sections ===== */
+    @keyframes float-slow {
+      0%, 100% { transform: translateY(0px) translateX(0px); }
+      50% { transform: translateY(-40px) translateX(-20px); }
+    }
+    @keyframes float-medium {
+      0%, 100% { transform: translateY(0px) translateX(0px); }
+      50% { transform: translateY(30px) translateX(30px); }
+    }
+    @keyframes float-fast {
+      0%, 100% { transform: translateY(0px) translateX(0px); }
+      50% { transform: translateY(-50px) translateX(40px); }
+    }
+    .animate-float-slow { animation: float-slow 8s ease-in-out infinite; }
+    .animate-float-medium { animation: float-medium 10s ease-in-out infinite; }
+    .animate-float-fast { animation: float-fast 6s ease-in-out infinite; }
+
+    .hero-float { position: absolute; pointer-events: none; font-size: clamp(1.8rem, 3vw, 2.5rem); opacity: 0.1; z-index: 1; will-change: transform; }
+    @media (max-width: 768px) { .hero-float { font-size: 1.5rem; opacity: 0.08; } }
+
+    /* ===== SOUND TOGGLE ===== */
+    #sound-btn {
+      border-color: rgba(250,208,44,0.6);
+      color: #fad02c;
+      box-shadow: 0 0 20px rgba(250,208,44,0.1);
+      transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
+    }
+    #sound-btn:hover { transform: scale(1.08); box-shadow: 0 0 35px rgba(250,208,44,0.25); }
+    #sound-btn.muted { border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.3); box-shadow: none; }
+    #sound-btn.muted:hover { transform: scale(1.05); box-shadow: none; border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.6); }
+    #sound-toggle { transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.23,1,0.32,1), visibility 0.6s ease; }
+    @media (max-width: 640px) { #sound-btn { width: 48px; height: 48px; font-size: 1.25rem; } #sound-toggle { bottom: 16px; right: 16px; } }
+
+    /* ============================================================ */
+    /* HERO – FULLY RESPONSIVE LAYOUT */
+    /* ============================================================ */
+    #hero {
+      position: relative;
+      min-height: 100dvh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(1rem, 4vh, 3rem) clamp(1rem, 4vw, 5rem);
+      overflow: visible;
+      background: transparent;
+    }
+    .hero-bg-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      gap: clamp(0.4rem, 1.5vh, 1.8rem);
+      padding: 0.5rem 0;
+      min-height: 0;
+      flex: 1 1 auto;
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    .hero-logo {
+      width: 100%;
+      max-width: clamp(120px, 18vw, 280px);
+      flex-shrink: 0;
+      margin-top: clamp(0.2rem, 1vh, 1.5rem);
+    }
+    .hero-logo img { width: 100%; height: auto; display: block; }
+
+    .hero-slogan-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+      max-width: 900px;
+      flex-shrink: 0;
+    }
+    .hero-prefix {
+      font-family: 'Hitchcut', 'Bebas Neue', 'Inter', sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      font-size: clamp(16px, 2.6vw, 44px);
+      line-height: 1.1;
+      color: #ffffff;
+      margin-bottom: clamp(0.05rem, 0.2vh, 0.2rem);
+    }
+    @media (min-width: 768px) { .hero-prefix { font-size: clamp(22px, 3vw, 52px); } }
+
+    .hero-keyword {
+      font-family: 'Hitchcut', 'Bebas Neue', 'Inter', sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      font-size: clamp(36px, 8vw, 130px);
+      line-height: 0.85;
+      color: #fad02c;
+      margin-top: clamp(-4px, -0.5vh, -10px);
+    }
+    @media (min-width: 768px) { .hero-keyword { font-size: clamp(48px, 9vw, 150px); margin-top: clamp(-6px, -0.6vh, -12px); } }
+    @media (min-width: 1200px) { .hero-keyword { font-size: clamp(56px, 10vw, 170px); } }
+
+    .hero-slogan-block + .hero-slogan-block { margin-top: clamp(0.1rem, 0.6vh, 0.4rem); }
+
+    .hero-cta-group {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.5rem, 1vh, 1.2rem);
+      width: 100%;
+      max-width: 520px;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: clamp(0.2rem, 0.8vh, 1rem);
+    }
+    @media (min-width: 480px) {
+      .hero-cta-group { flex-direction: row; gap: clamp(1rem, 2vw, 2.5rem); max-width: 600px; }
+    }
+    @media (min-width: 768px) {
+      .hero-cta-group { gap: clamp(1.5rem, 2.5vw, 3rem); max-width: 680px; margin-top: clamp(0.3rem, 1.2vh, 1.2rem); }
+    }
+
+    .hero-cta-group .magnetic-btn {
+      flex: 1 1 auto;
+      min-width: 120px;
+      max-width: 240px;
+      width: 100%;
+      height: clamp(44px, 5vh, 60px);
+      padding: 0 1rem;
+      font-size: clamp(0.7rem, 1vw, 0.95rem);
+      letter-spacing: 0.5px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      white-space: nowrap;
+    }
+    @media (min-width: 480px) {
+      .hero-cta-group .magnetic-btn { min-width: 150px; max-width: 260px; font-size: clamp(0.8rem, 1.2vw, 1rem); height: clamp(48px, 6vh, 64px); padding: 0 1.5rem; }
+    }
+    @media (min-width: 768px) {
+      .hero-cta-group .magnetic-btn { min-width: 180px; max-width: 280px; font-size: clamp(0.85rem, 1.3vw, 1.05rem); height: clamp(52px, 7vh, 68px); }
+    }
+
+    .hero-scroll-indicator {
+      position: absolute;
+      bottom: clamp(0.5rem, 1.5vh, 2rem);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      color: #ffffff;
+      font-size: clamp(0.5rem, 0.8vw, 0.8rem);
+      letter-spacing: 0.3em;
+      font-family: 'Hitchcut', 'Bebas Neue', 'Inter', sans-serif;
+      font-weight: 800;
+      text-transform: uppercase;
+      animation: pulse 2s ease-in-out infinite;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    /* ===== SECTION FADE-IN ===== */
+    .fade-section { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .fade-section.visible { opacity: 1; transform: translateY(0); }
+
+    /* ===== ENHANCED MARQUEE ===== */
+    .s-curve-wrapper {
+      perspective: 1000px;
+      padding: 50px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      overflow: hidden;
+      margin: 0;
+    }
+    .ticker-track {
+      display: flex;
+      white-space: nowrap;
+      width: max-content;
+      transform: rotateX(10deg) rotateY(-20deg) rotateZ(2deg);
+      align-items: center;
+    }
+    .ticker-content {
+      display: flex;
+      gap: 0;
+      animation: marquee 35s linear infinite;
+      align-items: center;
+    }
+    .reverse .ticker-content { animation: marquee-reverse 35s linear infinite; }
+    .item {
+      font-size: clamp(2rem, 4vw, 4rem);
+      font-weight: 800;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(12px, 2vw, 20px);
+      font-family: 'Hitchcut', 'Bebas Neue', sans-serif;
+      padding: 0 clamp(20px, 4vw, 40px);
+      line-height: 1;
+      height: auto;
+      min-height: 1.2em;
+      transition: color 0.3s ease;
+    }
+    .item:hover { color: rgba(255,255,255,0.95); }
+    .star { color: #fad02c; display: inline-flex; align-items: center; justify-content: center; line-height: 1; font-size: 1.2em; }
+    @keyframes marquee { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
+    @keyframes marquee-reverse { 0% { transform: translateX(-50%); } 100% { transform: translateX(0%); } }
+    @media (max-width: 768px) {
+      .item { font-size: clamp(1.4rem, 3vw, 2.2rem); gap: 10px; padding: 0 15px; letter-spacing: 2px; }
+      .ticker-track { transform: rotateX(8deg) rotateY(-15deg) rotateZ(1deg); }
+      .s-curve-wrapper { padding: 30px 0; gap: 20px; }
+    }
+    @media (max-width: 480px) {
+      .item { font-size: 1rem; gap: 6px; padding: 0 10px; letter-spacing: 1px; }
+    }
+    .marquee-section { padding-top: 3rem !important; padding-bottom: 3rem !important; margin: 0; position: relative; z-index: 2; }
+
+    /* ===== RESPONSIVE GRID FOR CREATORS / CAMPAIGNS ===== */
+    #creators .grid, #campaigns .grid {
+      display: grid;
+      gap: clamp(1.5rem, 3vw, 3rem);
+    }
+    #creators .grid { grid-template-columns: 1fr; }
+    @media (min-width: 640px) { #creators .grid { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 1024px) { #creators .grid { grid-template-columns: 1fr 1fr; } }
+
+    #campaigns .grid { grid-template-columns: 1fr; }
+    @media (min-width: 640px) { #campaigns .grid { grid-template-columns: 1fr 1fr; } }
+
+    /* ===== JOIN SECTIONS – floating rectangles hide on small screens ===== */
+    .join-float {
+      display: block;
+    }
+    @media (max-width: 768px) {
+      .join-float { display: none; }
+    }
+
+    /* ===== PARALLAX LOGO OVERRIDE ===== */
+    .parallax-layer-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.06;
+      width: 100%;
+      height: 100%;
+    }
+    .parallax-layer-logo img {
+      width: 40vw;
+      max-width: 500px;
+      height: auto;
+      object-fit: contain;
+    }
+    @media (max-width: 768px) {
+      .parallax-layer-logo img {
+        width: 60vw;
+        max-width: 300px;
+      }
+    }
+    #form-status {
+      animation: fadeSlideUp 0.6s ease forwards;
+    }
+    @keyframes fadeSlideUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== USER SELECTION OVERRIDES ===== */
+    button {
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    footer img,
+    footer a {
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+
+    /* ===== CUSTOM SELECTION COLORS PER SECTION ===== */
+    #about ::selection { background: #fad02c; color: #150C16; }
+    #creators ::selection { background: #1800AD; color: #ffffff; }
+    #campaigns ::selection { background: #fad02c; color: #150C16; }
+    #services ::selection { background: #ffffff; color: #1800AD; }
+    #join-creator ::selection { background: #fad02c; color: #150C16; }
+    #join-brand ::selection { background: #ffffff; color: #1800AD; }
+    #contact ::selection { background: #fad02c; color: #150C16; }
+    #privacy ::selection { background: #1800AD; color: #ffffff; }
+    footer ::selection { background: #fad02c; color: #150C16; }
+
+    /* ===== CURSOR TOGGLE VISIBILITY ===== */
+    #cursor-toggle.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+    }
+
+    /* ===== CURSOR MODE STYLES ===== */
+    body.cursor-original #cursor-container,
+    body.cursor-original .cursor-trail {
+      display: none !important;
+    }
+    body.cursor-original {
+      cursor: auto !important;
+    }
+    body.cursor-original * {
+      cursor: auto !important;
+    }
+
+    body.cursor-pip #cursor-container,
+    body.cursor-pip .cursor-trail {
+      display: block !important;
+    }
+    body.cursor-pip {
+      cursor: none !important;
+    }
+    body.cursor-pip * {
+      cursor: none !important;
+    }
+
+    /* ===== CURSOR TOGGLE BUTTON SVG ===== */
+    #cursor-icon-svg {
+      transition: stroke 0.3s ease;
+    }
+    #cursor-btn .cursor-label {
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin-top: 1px;
+      transition: color 0.3s ease;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    #cursor-btn .cursor-label.pip-label {
+      color: #fad02c;
+    }
+    #cursor-btn .cursor-label.original-label {
+      color: #ffffff;
+    }
+
+    /* ===== MOBILE CAROUSEL (≤ 768px) ===== */
+    @media (max-width: 768px) {
+      #creators .grid,
+      #campaigns .grid {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        scroll-snap-type: x mandatory !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        gap: 1rem !important;
+        padding: 0.5rem 0 0.5rem 1rem;
+      }
+      .about-card-col .about-card-wrapper {
+  margin-right: 20px; /* pulls logo left */
+}
+
+      #creators .grid::-webkit-scrollbar,
+      #campaigns .grid::-webkit-scrollbar {
+        display: none;
+      }
+
+      #creators .comet-card,
+      #campaigns .campaign-comet-card {
+        flex: 0 0 85% !important;
+        max-width: 85% !important;
+        scroll-snap-align: start !important;
+        transform: none !important; /* remove desktop rotation */
+        margin-bottom: 0.5rem;
+      }
+
+      .carousel-dots {
+        display: flex !important;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        padding: 0.5rem 0;
+      }
+
+      .carousel-dots .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.3);
+        transition: background 0.3s ease, transform 0.3s ease;
+        cursor: pointer;
+        pointer-events: auto;
+      }
+
+      .carousel-dots .dot.active {
+        background: #fad02c;
+        transform: scale(1.2);
+      }
+    }
+
+    /* Hide dots on desktop */
+    .carousel-dots {
+      display: none;
+    }
+
+    /* ===== ABOUT SECTION – RESPONSIVE LAYOUT FOR LOGO ===== */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas: "heading heading"
+                           "text card";
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .about-heading {
+      grid-area: heading;
+      margin-bottom: 0; /* override existing mb-8 */
+    }
+
+    .about-text-col {
+      grid-area: text;
+    }
+
+    .about-card-col {
+      grid-area: card;
+      display: flex;
+      justify-content: center;
+    }
+
+    .about-card-col .about-card-wrapper {
+      max-width: 100%;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .about-grid {
+        grid-template-areas: "heading card"
+                             "text text";
+        grid-template-columns: 1fr auto;
+        gap: 0.5rem 1rem;
+        align-items: center;
+      }
+
+      .about-heading {
+        font-size: 2rem !important; /* adjust size as needed */
+        margin-bottom: 0;
+      }
+
+      .about-card-col .about-card-wrapper {
+        max-width: 80px !important;
+        width: auto !important;
+        transform: rotate(0deg) !important;
+      }
+
+      .about-card-col .comet-card {
+        padding: 6px !important;
+        border-radius: 50% !important;
+      }
+
+      .about-card-col .image-viewport {
+        aspect-ratio: 1 / 1 !important;
+        border-radius: 50% !important;
+      }
+
+      .about-text-col {
+        grid-column: 1 / -1;
+        margin-top: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== LOADER OVERLAY ===== -->
+  <div id="loader-overlay">
+    <div class="loader-logo-wrapper">
+      <span class="loader-letter" id="letter-T">T</span>
+      <span class="loader-letter" id="letter-L">L</span>
+      <span class="loader-letter" id="letter-N">N</span>
+      <span class="loader-letter" id="letter-T2">T</span>
+      <span class="loader-letter" id="letter-S">S</span>
+      <span class="loader-letter" id="letter-dot">.</span>
+    </div>
+    <div class="loader-subtitle" id="loader-subtitle">by blankframemedia.</div>
+  </div>
+
+  <!-- ===== SOUND PERMISSION DIALOG ===== -->
+  <div id="sound-permission-overlay">
+    <div class="sound-permission-card">
+      <div class="icon-wrap">
+        <i class="fas fa-headphones-simple"></i>
+      </div>
+      <h2>Enable Sound?</h2>
+      <p>TLNTS uses subtle audio feedback to enhance your browsing experience. Would you like to enable sound?</p>
+      <div class="btn-group">
+        <button id="sound-allow" class="btn-allow">Yes, Enable</button>
+        <button id="sound-deny" class="btn-deny">No Thanks</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CUSTOM CURSOR ===== -->
+  <div id="cursor">
+    <div id="cursor-container">
+      <div id="cursor-glow"></div>
+      <svg id="cursor-svg" viewBox="0 0 40 40" width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 6 6 C 10 4, 18 6, 22 10 C 26 14, 28 18, 26 22 C 24 24, 20 22, 16 20 C 18 24, 20 28, 18 30 C 16 32, 12 30, 10 28 C 8 26, 6 22, 6 18 Z" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- ===== BACKGROUND LAYERS ===== -->
+  <div class="bg-layer bg-layer-1"></div>
+  <div class="bg-layer bg-layer-2"></div>
+  <div class="bg-layer bg-layer-3"></div>
+  <div class="bg-layer bg-layer-4"></div>
+  <div class="bg-layer bg-layer-5"></div>
+  <div class="bg-blob" id="bg-blob"></div>
+  <div class="bg-blob-2" id="bg-blob-2"></div>
+
+  <!-- ===== SOUND TOGGLE ===== -->
+  <div id="sound-toggle" class="fixed bottom-8 right-8 z-50 opacity-0 invisible scale-95">
+    <button id="sound-btn" class="w-14 h-14 rounded-full bg-[#150C16]/80 backdrop-blur-sm border-2 flex items-center justify-center text-2xl magnetic-btn shadow-lg transition-all duration-300">
+      <i id="sound-icon" class="fas fa-volume-high"></i>
+    </button>
+  </div>
+
+  <!-- ===== CURSOR TOGGLE ===== -->
+  <div id="cursor-toggle" class="fixed bottom-28 right-8 z-50 opacity-0 invisible scale-95 transition-all duration-300">
+    <button id="cursor-btn" class="w-14 h-14 rounded-full bg-[#150C16]/80 backdrop-blur-sm border-2 border-[#fad02c]/40 flex flex-col items-center justify-center shadow-lg hover:scale-105 transition-transform magnetic-btn">
+      <span id="cursor-icon-wrapper" class="flex items-center justify-center w-8 h-8">
+        <svg id="cursor-icon-svg" viewBox="0 0 40 40" width="28" height="28" fill="none" stroke="#fad02c" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 6 6 C 10 4, 18 6, 22 10 C 26 14, 28 18, 26 22 C 24 24, 20 22, 16 20 C 18 24, 20 28, 18 30 C 16 32, 12 30, 10 28 C 8 26, 6 22, 6 18 Z" />
+        </svg>
+      </span>
+      <span id="cursor-label" class="cursor-label pip-label">Pip</span>
+    </button>
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div id="root" class="relative z-10">
+
+    <!-- ===== HERO ===== -->
+    <section id="hero" class="relative w-full" style="background: transparent;">
+      <div class="hero-bg-layer">
+        <div class="hero-glow hero-glow-1" id="glow1"></div>
+        <div class="hero-glow hero-glow-2" id="glow2"></div>
+        <div class="hero-glow hero-glow-3" id="glow3"></div>
+        <div class="parallax-hero" id="parallax-hero">
+          <img src="image1.jpg" alt="Camera" />
+          <img src="image2.jpg" alt="Laptop" />
+          <img src="image3.jpg" alt="Microphone" />
+          <img src="image4.jpg" alt="Film" />
+          <img src="image5.jpg" alt="Editing" />
+          <img src="image6.jpg" alt="Lighting" />
+          <img src="image7.jpg" alt="Creator" />
+        </div>
+      </div>
+
+      <div class="hero-content" id="hero-content">
+        <div class="hero-logo">
+          <img src="tlnts.jpg" alt="TLNTS" id="hero-logo-img" />
+        </div>
+        <div class="hero-slogan-block text-center">
+          <span class="hero-prefix">IF NOT ME,</span>
+          <span id="who-text" class="hero-keyword">WHO?</span>
+        </div>
+        <div class="hero-slogan-block text-center">
+          <span class="hero-prefix">IF NOT NOW,</span>
+          <span id="when-text" class="hero-keyword">WHEN?</span>
+        </div>
+        <div class="hero-cta-group">
+          <button id="hero-primary-btn" class="magnetic-btn btn-primary font-hitchcut" data-target="join-creator">
+            Join us as a Creator
+          </button>
+          <button id="hero-secondary-btn" class="magnetic-btn btn-secondary font-hitchcut" data-target="join-brand">
+            Join us as a Brand
+          </button>
+        </div>
+      </div>
+      <div class="hero-scroll-indicator">SCROLL</div>
+    </section>
+
+    <!-- ===== ABOUT (UPDATED) ===== -->
+    <section id="about" class="relative w-full bg-[#150C16] section-padding px-6 md:px-20 overflow-hidden">
+      <div class="relative z-10 max-w-7xl mx-auto fade-section">
+        <div class="about-grid">
+          <h2 class="about-heading font-hitchcut text-4xl md:text-7xl text-[#ffffff]">About TLNTS</h2>
+          <div class="about-text-col about-text space-y-6" id="about-text">
+            <p>We exist for the people who <strong>can't stop creating</strong>.</p>
+            <p>The ones who <strong>don't wait for permission</strong>.<br />The ones who'd rather <strong>make something</strong> than talk about making something.</p>
+            <p>Whether you're creating from your bedroom, your phone, or a full blown studio, it doesn't matter. If you've got the drive, <strong>we've got your back</strong>.</p>
+            <p>TLNTS is a <span class="highlight">content first, creator first collective</span> built for people who want to create work that actually means something. We help creators create, connect them with brands that fit, and build opportunities that go beyond one off collaborations.</p>
+            <p>Because the internet doesn't need more content.<br /><strong>It needs better creators.</strong></p>
+            <p>So if you've been waiting for the right time, the right camera, the right audience, or the right opportunity…</p>
+            <div class="pt-4">
+              <p class="text-xl font-hitchcut text-white">If not me, <span style="color: #fad02c;">WHO</span>?</p>
+              <p class="text-xl font-hitchcut text-white">If not now, <span style="color: #fad02c;">WHEN</span>?</p>
+            </div>
+            <div class="pt-6 border-t border-white/5">
+              <p class="text-sm text-[rgba(255,255,255,0.6)]">Creators × Brands × Culture</p>
+            </div>
+          </div>
+          <div class="about-card-col">
+            <div class="about-card-wrapper transform rotate-6 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:rotate-0">
+              <div class="comet-card about-glass-card w-full rounded-full overflow-hidden shadow-2xl" id="about-card">
+                <div class="comet-glow rounded-full" id="glow-about"></div>
+                <div class="about-glass-border"></div>
+                <div class="image-viewport rounded-full" style="aspect-ratio: 1 / 1;">
+                  <img src="tlnts_blue.jpg" alt="TLNTS Blue" class="card-image" style="width: 100%; height: 100%; object-fit: contain;" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FEATURED CREATORS (with dots) ===== -->
+    <section id="creators" class="relative w-full bg-[#150C16] section-padding px-6 md:px-20 overflow-hidden">
+      <div class="parallax-parent">
+        <div class="parallax-child" id="creators-parallax">
+          <div class="parallax-layer-logo">
+            <img src="tlnts.jpg" alt="TLNTS" />
+          </div>
+        </div>
+      </div>
+      <div class="relative z-10 max-w-7xl mx-auto fade-section">
+        <h2 class="font-hitchcut text-4xl md:text-7xl mb-12 md:mb-16 text-[#ffffff]">Featured Creators</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-6xl mx-auto justify-items-center">
+          <!-- Card 1 -->
+          <div class="comet-card w-full max-w-md" id="comet1" style="transform: rotate(-1.5deg);">
+            <div class="comet-glow" id="glow1-card"></div>
+            <div class="image-viewport">
+              <img src="creator1.jpeg" alt="Bikiran Sarma" class="card-image" style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+            <div class="pop-out-text-wrap">
+              <h1 class="pop-text-main">Bikiran Sarma</h1>
+              <div class="pop-text-sub">Guitarist · Streamer</div>
+            </div>
+            <div class="card-footer">
+              <div>TLNTS CREATOR</div>
+              <div class="card-id">#T001</div>
+            </div>
+            <div class="card-dock-overlay">
+              <a href="https://www.instagram.com/bikirannn_/" class="dock-icon"><i class="fab fa-instagram"></i></a>
+              <a href="https://www.twitch.tv/bikirannn" class="dock-icon"><i class="fab fa-twitch"></i></a>
+              <a href="https://www.youtube.com/@bikiunplugged" class="dock-icon"><i class="fab fa-youtube"></i></a>
+            </div>
+          </div>
+          <!-- Card 2 -->
+          <div class="comet-card w-full max-w-md" id="comet2" style="transform: rotate(2deg);">
+            <div class="comet-glow" id="glow2-card"></div>
+            <div class="image-viewport">
+              <img src="creator2.jpg" alt="KWWANZO" class="card-image" style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+            <div class="pop-out-text-wrap">
+              <h1 class="pop-text-main">KWWANZO</h1>
+              <div class="pop-text-sub">VARIETY STREAMER</div>
+            </div>
+            <div class="card-footer">
+              <div>TLNTS CREATOR</div>
+              <div class="card-id">#T002</div>
+            </div>
+            <div class="card-dock-overlay">
+              <a href="https://www.instagram.com/kwwanzo/" target="_blank" class="dock-icon">
+                <i class="fab fa-instagram"></i>
+              </a>
+              <a href="https://www.twitch.tv/kwwanzo_1" target="_blank" class="dock-icon">
+                <i class="fab fa-twitch"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        <!-- Carousel dots for mobile -->
+        <div class="carousel-dots" data-carousel="creators"></div>
+      </div>
+    </section>
+
+    <!-- ===== FEATURED CAMPAIGNS (with dots) ===== -->
+    <section id="campaigns" class="relative w-full bg-[#150C16] section-padding px-6 md:px-20 overflow-hidden">
+      <div class="parallax-parent">
+        <div class="parallax-child" id="campaigns-parallax">
+          <div class="parallax-layer-logo">
+            <img src="tlnts.jpg" alt="TLNTS" />
+          </div>
+        </div>
+      </div>
+      <div class="relative z-10 max-w-7xl mx-auto fade-section">
+        <h2 class="font-hitchcut text-4xl md:text-7xl mb-12 md:mb-16 text-[#ffffff]">Featured Campaigns</h2>
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+  <div class="campaign-comet-card" id="campaign1" data-href="https://www.instagram.com/reel/DYU-on2TRS7/?igsh=ZDh1dTNsZ2Uxc3Ry">
+    <div class="comet-glow" id="glow-camp1"></div>
+    <div class="image-viewport">
+      <img src="campaign1.jpg" alt="Futsanity Campaign" class="card-image" style="width: 100%; height: 100%; object-fit: cover;" />
+    </div>
+    <div class="pop-out-text-wrap">
+      <h1 class="pop-text-main">Futsanity</h1>
+    </div>
+    <div class="card-footer"></div>
+  </div>
+  <div class="campaign-comet-card" id="campaign2" data-href="https://www.instagram.com/reel/DZ2lwBpzxV9/">
+    <div class="comet-glow" id="glow-camp2"></div>
+    <div class="image-viewport">
+      <img src="campaign2.jpg" alt="Devil Burger Promo Campaign" class="card-image" style="width: 100%; height: 100%; object-fit: cover;" />
+    </div>
+    <div class="pop-out-text-wrap">
+      <h1 class="pop-text-main">Devil Burger Promo</h1>
+      <div class="pop-text-sub">Social-First Campaign</div>
+    </div>
+    <div class="card-footer"></div>
+  </div>
+</div>
+<!-- Carousel dots for mobile -->
+<div class="carousel-dots" data-carousel="campaigns"></div>
+    </section>
+
+    <!-- ===== SERVICES ===== -->
+    <section id="services" class="relative w-full bg-[#1800AD] section-padding px-6 md:px-20 overflow-hidden">
+      <div class="relative z-10 max-w-7xl mx-auto fade-section">
+        <div class="text-center mb-16 md:mb-20">
+          <h2 class="font-hitchcut text-5xl md:text-8xl text-[#ffffff] tracking-wider inline-block relative">
+            SERVICES
+            <span class="block w-24 h-1 bg-[#fad02c] mx-auto mt-4"></span>
+          </h2>
+        </div>
+        <div class="space-y-8 md:space-y-20 text-center">
+          <div class="service-word text-4xl md:text-[100px] leading-[1.1] tracking-tight text-[#ffffff] hover:text-[#fad02c]">CREATOR LED EVENTS</div>
+          <div class="service-word text-4xl md:text-[100px] leading-[1.1] tracking-tight text-[#ffffff]/80 hover:text-[#fad02c]">CREATOR LED BRANDS</div>
+          <div class="service-word text-4xl md:text-[100px] leading-[1.1] tracking-tight text-[#ffffff]/60 hover:text-[#fad02c]">CREATOR MANAGEMENT</div>
+          <div class="service-word text-4xl md:text-[100px] leading-[1.1] tracking-tight text-[#ffffff]/40 hover:text-[#fad02c]">CULTURE REPRESENTATION</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== MARQUEE ===== -->
+    <section class="relative w-full bg-[#1A1722] border-y border-white/5 marquee-section">
+      <div class="s-curve-wrapper">
+        <div class="ticker-track">
+          <div class="ticker-content">
+            <div class="item"><span class="star">✦</span> CREATORS</div>
+            <div class="item"><span class="star">✦</span> BRANDS</div>
+            <div class="item"><span class="star">✦</span> EDITORS</div>
+            <div class="item"><span class="star">✦</span> FILMMAKERS</div>
+            <div class="item"><span class="star">✦</span> PHOTOGRAPHERS</div>
+            <div class="item"><span class="star">✦</span> CONTENT</div>
+            <div class="item"><span class="star">✦</span> CREATORS</div>
+            <div class="item"><span class="star">✦</span> BRANDS</div>
+            <div class="item"><span class="star">✦</span> EDITORS</div>
+            <div class="item"><span class="star">✦</span> FILMMAKERS</div>
+            <div class="item"><span class="star">✦</span> PHOTOGRAPHERS</div>
+            <div class="item"><span class="star">✦</span> CONTENT</div>
+          </div>
+        </div>
+        <div class="ticker-track reverse">
+          <div class="ticker-content">
+            <div class="item"><span class="star">✦</span> CREATORS</div>
+            <div class="item"><span class="star">✦</span> BRANDS</div>
+            <div class="item"><span class="star">✦</span> EDITORS</div>
+            <div class="item"><span class="star">✦</span> FILMMAKERS</div>
+            <div class="item"><span class="star">✦</span> PHOTOGRAPHERS</div>
+            <div class="item"><span class="star">✦</span> CONTENT</div>
+            <div class="item"><span class="star">✦</span> CREATORS</div>
+            <div class="item"><span class="star">✦</span> BRANDS</div>
+            <div class="item"><span class="star">✦</span> EDITORS</div>
+            <div class="item"><span class="star">✦</span> FILMMAKERS</div>
+            <div class="item"><span class="star">✦</span> PHOTOGRAPHERS</div>
+            <div class="item"><span class="star">✦</span> CONTENT</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== JOIN AS CREATOR ===== -->
+    <section id="join-creator" class="relative w-full bg-[#150C16] section-padding px-6 md:px-20 overflow-hidden">
+      <div class="join-float absolute top-20 left-8 md:left-20 w-32 md:w-48 h-40 md:h-56 bg-gradient-to-br from-[#1800AD]/20 to-transparent rounded-2xl animate-float-slow z-0"></div>
+      <div class="join-float absolute bottom-32 right-12 md:right-32 w-40 md:w-56 h-48 md:h-64 bg-gradient-to-tl from-[#fad02c]/10 to-transparent rounded-2xl animate-float-medium z-0"></div>
+      <div class="join-float absolute top-1/3 right-8 md:right-20 w-24 md:w-32 h-32 md:h-40 bg-gradient-to-br from-[#1800AD]/15 to-transparent rounded-xl animate-float-fast z-0"></div>
+      <div class="relative z-10 max-w-7xl mx-auto text-center fade-section">
+        <h2 class="font-hitchcut text-4xl md:text-7xl text-[#ffffff] mb-6">Join as a Creator</h2>
+        <p class="text-[#ffffff] text-lg md:text-xl mb-10 md:mb-12 max-w-2xl mx-auto">Turn your passion into a profession. Get discovered by the world's biggest brands.</p>
+       <a href="https://forms.gle/KpzaYwsFr31BE2749" target="_blank" rel="noopener noreferrer" class="magnetic-btn btn-primary px-10 md:px-12 py-4 md:py-5 rounded-full font-bold text-base md:text-[18px] font-hitchcut shadow-glow inline-block text-center">Apply Now</a>
+      </div>
+    </section>
+
+    <!-- ===== JOIN AS BRAND ===== -->
+    <section id="join-brand" class="relative w-full bg-[#1800AD] section-padding px-6 md:px-20 overflow-hidden">
+      <div class="relative z-10 max-w-7xl mx-auto text-center fade-section">
+        <h2 class="font-hitchcut text-4xl md:text-7xl text-[#ffffff] mb-6">Join as a Brand</h2>
+        <p class="text-[#ffffff] text-lg md:text-xl mb-10 md:mb-12 max-w-2xl mx-auto">Access the most innovative creators in the world. Scale your campaigns with TLNTS.</p>
+        <a href="https://forms.gle/7TuBBjBHu1iqZc3P6" target="_blank" rel="noopener noreferrer" class="magnetic-btn btn-primary px-10 md:px-12 py-4 md:py-5 rounded-full font-bold text-base md:text-[18px] font-hitchcut shadow-glow inline-block text-center">Partner With Us</a>
+      </div>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section id="contact" class="relative w-full bg-[#150C16] section-padding px-6 md:px-20 overflow-hidden">
+      <div class="relative z-10 max-w-5xl mx-auto text-center fade-section">
+        <h2 class="font-hitchcut text-5xl md:text-8xl text-[#ffffff] mb-8">Let's create</h2>
+        <p class="text-[#ffffff] text-lg md:text-xl mb-8 md:mb-12">Ready to scale your influence? Let's talk.</p>
+        <form id="contact-form" action="https://formsubmit.co/connect@tlnts.fun" method="POST" class="max-w-2xl mx-auto text-left">
+          <input type="text" name="_honey" style="display:none">
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_next" value="https://tlnts.fun/thank-you.html">
+          <input type="hidden" name="_subject" value="New message from TLNTS website">
+          <div id="form-fields" class="space-y-4">
+            <input type="text" name="name" placeholder="Your Name" required class="contact-input" />
+            <input type="email" name="email" placeholder="Your Email" required class="contact-input" />
+            <textarea name="message" placeholder="Your Message" rows="4" required class="contact-input" style="border-radius: 16px; resize: vertical; min-height: 120px;"></textarea>
+            <button type="submit" class="btn-primary px-10 md:px-12 py-4 md:py-5 rounded-full font-bold text-base md:text-[18px] whitespace-nowrap font-hitchcut w-full" id="submit-btn">Send Message</button>
+          </div>
+          <div id="form-status" style="display: none;" class="mt-8 text-center">
+            <div class="inline-block p-6 rounded-2xl bg-[#1800AD]/20 border border-[#fad02c]/30">
+              <div class="text-5xl mb-3">✅</div>
+              <h3 class="font-hitchcut text-2xl text-[#fad02c]">Message Sent!</h3>
+              <p class="text-[#ffffff]/70 mt-2">We'll get back to you soon.</p>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== PRIVACY POLICY ===== -->
+    <section id="privacy" class="relative w-full bg-[#150C16] section-padding px-6 md:px-20 border-t border-white/5 overflow-hidden">
+      <div class="parallax-parent">
+        <div class="parallax-child" id="privacy-parallax">
+          <div class="parallax-layer-logo">
+            <img src="tlnts.jpg" alt="TLNTS" />
+          </div>
+        </div>
+      </div>
+      <div class="relative z-10 max-w-4xl mx-auto fade-section">
+        <h2 class="font-hitchcut text-3xl md:text-6xl text-[#ffffff] mb-8">Privacy Policy</h2>
+        <div class="space-y-4 md:space-y-6 text-[#ffffff] text-sm md:text-lg leading-relaxed">
+          <p>TLNTS respects your privacy. This policy explains how we collect, use, and protect your data.</p>
+          <p><strong>Information we collect:</strong> We collect information you provide directly, such as your name, email address, and content you submit.</p>
+          <p><strong>How we use it:</strong> To connect you with brands, improve our services, and communicate with you.</p>
+          <p><strong>Data protection:</strong> We implement industry‑standard security measures to protect your data.</p>
+          <p><strong>Your rights:</strong> You may access, modify, or delete your data at any time by contacting us.</p>
+          <p class="text-sm text-[rgba(255,255,255,0.6)] mt-8">Last updated: January 2026</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="relative w-full bg-[#09070E] border-t border-white/5 px-6 md:px-20 py-12 md:py-32">
+      <div class="absolute inset-0 bg-gradient-to-t from-[#fad02c]/8 to-transparent pointer-events-none"></div>
+      <div class="relative z-10 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+        <div>
+          <div class="w-full max-w-[160px] md:max-w-xs mx-auto mb-4">
+            <img src="tlnts.jpg" alt="TLNTS" class="w-full h-auto" />
+          </div>
+        </div>
+        <div class="flex flex-col gap-3 md:gap-4 text-center md:text-left">
+          <a href="#about" class="footer-link">About</a>
+          <a href="#privacy" class="footer-link">Privacy</a>
+          <a href="#contact" class="footer-link">Contact</a>
+          <a href="#join-creator" class="footer-link">Join as Creator</a>
+          <a href="#join-brand" class="footer-link">Join as Brand</a>
+        </div>
+        <div class="text-[#ffffff] text-sm md:text-right text-center">
+          <p>© 2026 TLNTS</p>
+          <p class="mt-2">crafted with ❤️</p>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCRIPTS -->
+  <!-- ============================================================ -->
+  <script>
+    (function() {
+      'use strict';
+
+      // ---- LOADER ----
+      const loaderOverlay = document.getElementById('loader-overlay');
+      const letters = [
+        document.getElementById('letter-T'),
+        document.getElementById('letter-L'),
+        document.getElementById('letter-N'),
+        document.getElementById('letter-T2'),
+        document.getElementById('letter-S'),
+        document.getElementById('letter-dot')
+      ];
+      const subtitle = document.getElementById('loader-subtitle');
+
+      gsap.set(letters, { scale: 0, opacity: 0, rotation: 0, x: 0, y: 0 });
+      gsap.set(subtitle, { opacity: 0, y: 25 });
+
+      const loaderTL = gsap.timeline({
+        defaults: { ease: "power4.out" },
+        onComplete: () => { transitionToHomepage(); }
+      });
+
+      loaderTL.add(() => {}, 0);
+      const letterData = [
+        { el: letters[0], delay: 0.80, rot: 2 },
+        { el: letters[1], delay: 0.95, rot: -1 },
+        { el: letters[2], delay: 1.10, rot: 1 },
+        { el: letters[3], delay: 1.25, rot: -2 },
+        { el: letters[4], delay: 1.40, rot: 0.5 },
+        { el: letters[5], delay: 1.55, rot: 0 }
+      ];
+      letterData.forEach(({ el, delay, rot }) => {
+        if (!el) return;
+        loaderTL.to(el, { scaleX: 1.15, scaleY: 1.15, opacity: 1, rotation: rot, duration: 0.35,
+            ease: "back.out(1.8)", delay: delay }, 0)
+          .to(el, { scaleX: 1, scaleY: 1, rotation: 0, duration: 0.25, ease: "power2.out" }, delay + 0.32)
+          .to(el, { textShadow: '0 0 40px rgba(24,0,173,0.4)', duration: 0.2, ease: "power1.out", yoyo: true,
+            repeat: 1 }, delay + 0.28);
+      });
+      loaderTL.add(() => {}, 2.50);
+      loaderTL.to(subtitle, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out", delay: 2.50 }, 0)
+        .to(subtitle, { textShadow: '0 0 30px rgba(250,208,44,0.15)', duration: 0.3, ease: "power1.out",
+          yoyo: true, repeat: 1 }, 2.80);
+      loaderTL.add(() => {}, 3.60);
+
+      // ---- SOUND STATE ----
+      let soundEnabled = true;
+      let soundPermissionGranted = false;
+
+      const soundPermissionOverlay = document.getElementById('sound-permission-overlay');
+      const soundAllowBtn = document.getElementById('sound-allow');
+      const soundDenyBtn = document.getElementById('sound-deny');
+      const soundBtn = document.getElementById('sound-btn');
+      const soundIcon = document.getElementById('sound-icon');
+      const soundToggle = document.getElementById('sound-toggle');
+
+      let audioCtx = null;
+
+      function initAudio() {
+        if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+        return audioCtx;
+      }
+
+      function resumeAudioAndEnable() {
+        try {
+          const ctx = initAudio();
+          if (ctx && ctx.state === 'suspended') {
+            ctx.resume();
+          }
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = 640;
+          osc.type = 'sine';
+          gain.gain.setValueAtTime(0.08, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.1);
+        } catch (err) {}
+        soundEnabled = true;
+        soundPermissionGranted = true;
+        updateSoundButtonUI();
+        localStorage.setItem('soundPermission', 'granted');
+        sessionStorage.setItem('soundPermission', 'granted');
+      }
+
+      function denySound() {
+        soundEnabled = false;
+        soundPermissionGranted = false;
+        updateSoundButtonUI();
+        sessionStorage.setItem('soundPermission', 'denied');
+      }
+
+      function updateSoundButtonUI() {
+        if (soundBtn && soundIcon) {
+          if (soundEnabled) {
+            soundIcon.className = 'fas fa-volume-high';
+            soundBtn.classList.remove('muted');
+          } else {
+            soundIcon.className = 'fas fa-volume-xmark';
+            soundBtn.classList.add('muted');
+          }
+        }
+      }
+        // ---- Obfuscated console watermark (command: inano) ----
+    (function(){
+      // UTF-8 safe Base64 decode
+      function _decode(str) {
+        return decodeURIComponent(escape(atob(str)));
+      }
+      
+      // Correct Base64 chunks
+      var _0x = ['QWJo','aXNo','ZWsg','RHV0','dGEg','wqkg','Q29w','eXJp','Z2h0','cyAy','MDI2'];
+      var _1x = ['Q3Jh','ZnRl','ZCB3','aXRo','IOKd','pCBi','eSBJ','bmFu','by4='];
+      
+      var _2x = _0x.join('') + '|' + _1x.join('');
+      var _3x = _2x.split('|').map(function(e){ return _decode(e); });
+  
+      window['\x69\x6e\x61\x6e\x6f'] = function(){
+        console['\x6c\x6f\x67']('%c ' + _3x[0] + ' ', 'background: #150C16; color: #fad02c; font-size: 20px; font-weight: bold; padding: 12px; border-radius: 6px; border: 2px solid #fad02c;');
+        console['\x6c\x6f\x67']('%c ' + _3x[1] + ' ', 'background: #150C16; color: #ffffff; font-size: 16px; padding: 8px 12px; border-radius: 6px;');
+      };
+    })();
+
+            // ---- CURSOR TOGGLE ----
+      function setCursorMode(mode) {
+        const body = document.body;
+        body.classList.remove('cursor-pip', 'cursor-original');
+        body.classList.add('cursor-' + mode);
+        localStorage.setItem('cursorMode', mode);
+
+        const svg = document.getElementById('cursor-icon-svg');
+        const label = document.getElementById('cursor-label');
+        const btn = document.getElementById('cursor-btn');
+        const isMobile = window.innerWidth <= 768;
+
+        if (svg) {
+          if (mode === 'pip') {
+            svg.setAttribute('stroke', '#fad02c');
+            if (btn) btn.title = isMobile ? 'Visual Guide cursor' : 'Pip cursor';
+          } else {
+            svg.setAttribute('stroke', '#ffffff');
+            if (btn) btn.title = isMobile ? 'Pointer cursor' : 'Original cursor (Windows default)';
+          }
+        }
+
+        if (label) {
+          if (isMobile) {
+            label.textContent = mode === 'pip' ? 'Visual Guide' : 'Pointer';
+          } else {
+            label.textContent = mode === 'pip' ? 'Pip' : 'Original';
+          }
+          label.className = 'cursor-label ' + (mode === 'pip' ? 'pip-label' : 'original-label');
+        }
+      }
+
+      const savedCursor = localStorage.getItem('cursorMode') || 'pip';
+      setCursorMode(savedCursor);
+
+      const cursorBtn = document.getElementById('cursor-btn');
+      if (cursorBtn) {
+        cursorBtn.addEventListener('click', () => {
+          const current = localStorage.getItem('cursorMode') || 'pip';
+          const next = current === 'pip' ? 'original' : 'pip';
+          setCursorMode(next);
+        });
+      }
+       // Update labels on window resize (mobile ↔ desktop)
+      window.addEventListener('resize', () => {
+        const current = localStorage.getItem('cursorMode') || 'pip';
+        setCursorMode(current);
+      });
+
+      // ---- SOUND PERMISSION LOGIC ----
+      function showSoundPermissionDialog() {
+        if (sessionStorage.getItem('soundPermission') === 'granted') {
+          soundPermissionGranted = true;
+          soundEnabled = true;
+          soundPermissionOverlay.classList.add('hidden');
+          soundPermissionOverlay.classList.remove('visible');
+          resumeAudioAndEnable();
+          startHeroAndSite();
+          return;
+        }
+        if (sessionStorage.getItem('soundPermission') === 'denied') {
+          soundPermissionGranted = false;
+          soundEnabled = false;
+          soundPermissionOverlay.classList.add('hidden');
+          soundPermissionOverlay.classList.remove('visible');
+          updateSoundButtonUI();
+          startHeroAndSite();
+          return;
+        }
+        soundPermissionOverlay.classList.add('visible');
+        soundPermissionOverlay.classList.remove('hidden');
+      }
+
+      // ---- HERO START ----
+      function startHeroAndSite() {
+        const cursorContainer = document.getElementById('cursor-container');
+        if (cursorContainer) {
+          cursorContainer.classList.add('visible');
+          cursorContainer.style.opacity = '1';
+        }
+
+        if (soundToggle) {
+          soundToggle.classList.remove('opacity-0', 'invisible', 'scale-95');
+          soundToggle.classList.add('opacity-100', 'visible', 'scale-100');
+        }
+
+        const cursorToggle = document.getElementById('cursor-toggle');
+        if (cursorToggle) {
+          cursorToggle.classList.remove('opacity-0', 'invisible', 'scale-95');
+          cursorToggle.classList.add('opacity-100', 'visible', 'scale-100');
+        }
+
+        startMainHeroAnimation();
+        initSectionFades();
+        initMobileHeroFloat();
+        initGyroscopeParallax();
+      }
+
+      // ---- DIALOG EVENT LISTENERS ----
+      if (soundAllowBtn) {
+        soundAllowBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          resumeAudioAndEnable();
+          soundPermissionOverlay.classList.add('hidden');
+          soundPermissionOverlay.classList.remove('visible');
+          startHeroAndSite();
+        });
+      }
+
+      if (soundDenyBtn) {
+        soundDenyBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          denySound();
+          soundPermissionOverlay.classList.add('hidden');
+          soundPermissionOverlay.classList.remove('visible');
+          startHeroAndSite();
+        });
+      }
+
+      if (soundBtn) {
+        soundBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!soundPermissionGranted && !soundEnabled) {
+            soundPermissionOverlay.classList.add('visible');
+            soundPermissionOverlay.classList.remove('hidden');
+            return;
+          }
+          soundEnabled = !soundEnabled;
+          if (soundEnabled) {
+            soundIcon.className = 'fas fa-volume-high';
+            soundBtn.classList.remove('muted');
+            try {
+              const ctx = initAudio();
+              if (ctx && ctx.state === 'suspended') {
+                ctx.resume();
+              }
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.frequency.value = 640;
+              osc.type = 'sine';
+              gain.gain.setValueAtTime(0.08, ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+              osc.start(ctx.currentTime);
+              osc.stop(ctx.currentTime + 0.1);
+            } catch (err) {}
+          } else {
+            soundIcon.className = 'fas fa-volume-xmark';
+            soundBtn.classList.add('muted');
+          }
+        });
+      }
+
+      // ---- TRANSITION ----
+      function transitionToHomepage() {
+        loaderOverlay.classList.add('hidden');
+        const cursorContainer = document.getElementById('cursor-container');
+        if (cursorContainer) {
+          cursorContainer.classList.add('visible');
+          cursorContainer.style.opacity = '1';
+        }
+        setTimeout(() => {
+          showSoundPermissionDialog();
+        }, 600);
+        setTimeout(() => {
+          initMobileHeroFloat();
+          initGyroscopeParallax();
+        }, 100);
+      }
+
+      // ---- SECTION FADE-IN ----
+      function initSectionFades() {
+        const sections = document.querySelectorAll('.fade-section');
+        sections.forEach((section) => {
+          ScrollTrigger.create({
+            trigger: section,
+            start: "top 88%",
+            once: true,
+            toggleClass: { targets: section, className: "visible" }
+          });
+        });
+      }
+
+      // ---- PLAY SOUNDS ----
+      function playHoverSound() {
+        if (!soundEnabled || !soundPermissionGranted) return;
+        try {
+          const ctx = initAudio();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = 800 + Math.random() * 400;
+          osc.type = 'sine';
+          gain.gain.setValueAtTime(0.04, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.08);
+        } catch (e) {}
+      }
+
+      function playClickSound() {
+        if (!soundEnabled || !soundPermissionGranted) return;
+        try {
+          const ctx = initAudio();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.setValueAtTime(600, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.06);
+          osc.type = 'sine';
+          gain.gain.setValueAtTime(0.08, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.06);
+          const osc2 = ctx.createOscillator();
+          const gain2 = ctx.createGain();
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          osc2.frequency.value = 1200;
+          osc2.type = 'sine';
+          gain2.gain.setValueAtTime(0.03, ctx.currentTime + 0.02);
+          gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+          osc2.start(ctx.currentTime + 0.02);
+          osc2.stop(ctx.currentTime + 0.08);
+        } catch (e) {}
+      }
+
+      // ---- CURSOR ----
+      const cursorContainer = document.getElementById('cursor-container');
+      const cursorSvg = document.getElementById('cursor-svg');
+      const cursorEl = document.getElementById('cursor');
+      const quickToX = gsap.quickTo(cursorContainer, "x", { duration: 0.08, ease: "power1.out" });
+      const quickToY = gsap.quickTo(cursorContainer, "y", { duration: 0.08, ease: "power1.out" });
+
+      let isIdle = false,
+        idleAnim = null,
+        idleTimeout = null;
+      let trailPositions = [],
+        trailElements = [];
+      let currentMouseX = window.innerWidth / 2;
+      let currentMouseY = window.innerHeight / 2;
+      let targetMouseX = window.innerWidth / 2;
+      let targetMouseY = window.innerHeight / 2;
+
+      function createTrailElements() {
+        for (let i = 0; i < 3; i++) {
+          const trail = document.createElement('div');
+          trail.className = 'cursor-trail';
+          trail.innerHTML =
+            `<svg viewBox="0 0 40 40" width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path d="M 6 6 C 10 4, 18 6, 22 10 C 26 14, 28 18, 26 22 C 24 24, 20 22, 16 20 C 18 24, 20 28, 18 30 C 16 32, 12 30, 10 28 C 8 26, 6 22, 6 18 Z" /></svg>`;
+          trail.style.opacity = 0;
+          document.body.appendChild(trail);
+          trailElements.push(trail);
+        }
+      }
+      createTrailElements();
+
+      let rafId = null;
+
+      function updateCursorFrame() {
+        if (currentMouseX !== targetMouseX || currentMouseY !== targetMouseY) {
+          currentMouseX += (targetMouseX - currentMouseX) * 0.18;
+          currentMouseY += (targetMouseY - currentMouseY) * 0.18;
+          quickToX(currentMouseX);
+          quickToY(currentMouseY);
+          updateTrails(currentMouseX, currentMouseY);
+        }
+        rafId = requestAnimationFrame(updateCursorFrame);
+      }
+      rafId = requestAnimationFrame(updateCursorFrame);
+
+      document.addEventListener('visibilitychange', () => {
+        const cc = document.getElementById('cursor-container');
+        if (document.hidden) { if (cc) cc.classList.remove('visible'); } else { if (cc) { cc.classList.add('visible');
+            quickToX(targetMouseX);
+            quickToY(targetMouseY); } }
+      });
+      window.addEventListener('blur', () => { const cc = document.getElementById('cursor-container'); if (cc) cc.classList
+          .remove('visible'); });
+      window.addEventListener('focus', () => { const cc = document.getElementById('cursor-container'); if (cc) { cc.classList
+          .add('visible');
+          quickToX(targetMouseX);
+          quickToY(targetMouseY); } });
+
+      function updateTrails(cx, cy) {
+        trailPositions.push({ x: cx, y: cy });
+        if (trailPositions.length > 10) trailPositions.shift();
+        const steps = [3, 6, 9];
+        trailElements.forEach((trail, i) => {
+          const idx = Math.max(0, trailPositions.length - steps[i] - 1);
+          if (idx < trailPositions.length) {
+            const pos = trailPositions[idx];
+            trail.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${0.6 - i * 0.1})`;
+            trail.style.opacity = 0.08 - i * 0.025;
+            trail.style.filter = `blur(${1 + i * 1.5}px)`;
+          }
+        });
+      }
+
+      function handleMouseMove(e) {
+        const x = e.clientX,
+          y = e.clientY;
+        targetMouseX = x;
+        targetMouseY = y;
+        if (isIdle) {
+          isIdle = false;
+          if (idleAnim) { idleAnim.kill();
+            idleAnim = null; }
+          if (cursorSvg) cursorSvg.style.transform = 'translate(-50%, -50%) scale(1) rotate(0deg)';
+        }
+        clearTimeout(idleTimeout);
+        idleTimeout = setTimeout(() => {
+          isIdle = true;
+          if (!idleAnim && cursorSvg) {
+            idleAnim = gsap.to(cursorSvg, {
+              scale: 1.03,
+              duration: 2,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+              transformOrigin: "center center",
+              onUpdate: function() {
+                if (!isIdle) {
+                  this.kill();
+                  idleAnim = null;
+                  if (cursorSvg) cursorSvg.style.transform = 'translate(-50%, -50%) scale(1)';
+                }
+              }
+            });
+          }
+        }, 2000);
+      }
+
+      let isScrollbarDragging = false;
+      let scrollbarUpdateInterval = null;
+
+      document.addEventListener('pointermove', handleMouseMove, { passive: true });
+
+      document.addEventListener('pointerdown', (e) => {
+        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+        if (e.clientX >= window.innerWidth - scrollbarWidth - 20) {
+          isScrollbarDragging = true;
+          if (scrollbarUpdateInterval) clearInterval(scrollbarUpdateInterval);
+          scrollbarUpdateInterval = setInterval(() => {
+            quickToX(targetMouseX);
+            quickToY(targetMouseY);
+            updateTrails(targetMouseX, targetMouseY);
+          }, 16);
+        }
+      });
+      document.addEventListener('pointerup', () => {
+        isScrollbarDragging = false;
+        if (scrollbarUpdateInterval) { clearInterval(scrollbarUpdateInterval);
+          scrollbarUpdateInterval = null; }
+      });
+      window.addEventListener('scroll', () => {
+        if (isScrollbarDragging) {
+          quickToX(targetMouseX);
+          quickToY(targetMouseY);
+          updateTrails(targetMouseX, targetMouseY);
+        }
+      }, { passive: true });
+
+      const interactiveElements = document.querySelectorAll(
+        'button, a, .comet-card, .campaign-comet-card, .contact-input, .dock-icon, .magnetic-btn, .service-word, .footer-link, .image-viewport'
+      );
+      interactiveElements.forEach(el => {
+        el.addEventListener('mouseenter', () => { if (cursorEl) cursorEl.classList.add('hover');
+          playHoverSound(); });
+        el.addEventListener('mouseleave', () => { if (cursorEl) cursorEl.classList.remove('hover'); });
+        el.addEventListener('mousedown', () => { if (cursorEl) cursorEl.classList.add('click');
+          playClickSound();
+          createClickSplash(currentMouseX, currentMouseY); });
+        el.addEventListener('mouseup', () => { if (cursorEl) cursorEl.classList.remove('click'); });
+      });
+
+      document.addEventListener('mousedown', (e) => {
+        if (!e.target.closest('button') && !e.target.closest('a') && !e.target.closest('.comet-card') && !e.target
+          .closest('.campaign-comet-card') && !e.target.closest('.contact-input') && !e.target.closest(
+            '.dock-icon') && !e.target.closest('.magnetic-btn')) {
+          playClickSound();
+          createClickSplash(currentMouseX, currentMouseY);
+        }
+      });
+
+      function createClickSplash(x, y) {
+        const splash = document.createElement('div');
+        splash.style.cssText = `
+          position: fixed; pointer-events: none; z-index: 99997;
+          width: 80px; height: 80px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(24,0,173,0.25) 0%, rgba(24,0,173,0.05) 40%, transparent 70%);
+          left: ${x}px; top: ${y}px;
+          transform: translate(-50%, -50%) scale(0);
+          will-change: transform, opacity; opacity: 1;
+        `;
+        document.body.appendChild(splash);
+        gsap.to(splash, { scale: 3, opacity: 0, duration: 0.5, ease: "power2.out", onComplete: () => splash.remove() });
+      }
+
+      // 3D cards
+      document.querySelectorAll('.comet-card, .campaign-comet-card').forEach(card => {
+        const glow = card.querySelector('.comet-glow');
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left,
+            y = e.clientY - rect.top;
+          if (glow) { glow.style.setProperty('--mouse-x', `${x}px`);
+            glow.style.setProperty('--mouse-y', `${y}px`); }
+          const rotateX = -18 * ((y / rect.height) - 0.5);
+          const rotateY = 18 * ((x / rect.width) - 0.5);
+          card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+        });
+        card.addEventListener('mouseleave', () => { card.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)'; });
+      });
+
+      // ---- LENIS ----
+      const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add((time) => lenis.raf(time * 1000));
+      gsap.ticker.lagSmoothing(0);
+      gsap.registerPlugin(ScrollTrigger);
+
+      // ---- BLOBS ----
+      gsap.to("#bg-blob", { x: 200, y: 150, duration: 12, repeat: -1, yoyo: true, ease: "sine.inOut" });
+      gsap.to("#bg-blob-2", { x: -150, y: -100, duration: 10, repeat: -1, yoyo: true, ease: "sine.inOut" });
+
+      // ---- HERO ENTRANCE ----
+      function startMainHeroAnimation() {
+        const heroContent = document.getElementById('hero-content');
+        const glow1 = document.getElementById('glow1');
+        const glow2 = document.getElementById('glow2');
+        const glow3 = document.getElementById('glow3');
+        const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+        tl.to(glow1, { opacity: 1, duration: 0.3, delay: 0.05 })
+          .to(glow2, { opacity: 1, duration: 0.3, delay: 0 }, "-=0.2")
+          .to(glow3, { opacity: 1, duration: 0.4, delay: 0 }, "-=0.2")
+          .to(heroContent, { opacity: 1, scale: 1, duration: 0.4, delay: 0 })
+          .from("#hero-logo-img", { y: -30, scale: 0.8, duration: 0.4, ease: "back.out(1.7)" }, "-=0.2")
+          .from("#who-text", { scale: 0.3, opacity: 0, duration: 0.4, ease: "power4.out" }, "-=0.1")
+          .from("#when-text", { scale: 0.3, opacity: 0, duration: 0.4, ease: "power4.out" }, "-=0.15")
+          .from("#hero-primary-btn", { y: 15, opacity: 0, duration: 0.3 }, "-=0.1")
+          .from("#hero-secondary-btn", { y: 15, opacity: 0, duration: 0.3 }, "-=0.15")
+          .from(".hero-scroll-indicator", { opacity: 1, y: 0, duration: 0.3 }, "-=0.1");
+      }
+
+      // ---- MOBILE HERO FLOATING IMAGES ----
+      function initMobileHeroFloat() {
+        if (window.innerWidth > 767) return;
+        const images = document.querySelectorAll('#parallax-hero img');
+        images.forEach((img, index) => {
+          const durFloat = 6 + Math.random() * 6;
+          const yFloat = 8 + Math.random() * 18;
+          const rotX = (Math.random() - 0.5) * 4;
+          const rotY = (Math.random() - 0.5) * 4;
+          const delay = index * 0.6 + Math.random() * 0.5;
+          const tl = gsap.timeline({
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            delay: delay
+          });
+          tl.to(img, {
+            y: yFloat,
+            rotationX: rotX,
+            rotationY: rotY,
+            duration: durFloat,
+            ease: "sine.inOut"
+          }, 0)
+            .to(img, {
+              y: -yFloat * 0.6,
+              rotationX: -rotX * 0.7,
+              rotationY: -rotY * 0.8,
+              duration: durFloat,
+              ease: "sine.inOut"
+            }, durFloat * 0.5)
+            .to(img, {
+              y: 0,
+              rotationX: 0,
+              rotationY: 0,
+              duration: durFloat,
+              ease: "sine.inOut"
+            }, durFloat);
+        });
+      }
+
+      // ---- GYROSCOPE PARALLAX ----
+      function initGyroscopeParallax() {
+        if (!window.DeviceOrientationEvent || window.innerWidth > 767) return;
+        const images = document.querySelectorAll('#parallax-hero img');
+        let targetX = 0,
+          targetY = 0;
+        let currentX = 0,
+          currentY = 0;
+        window.addEventListener('deviceorientation', (e) => {
+          const gamma = e.gamma || 0;
+          const beta = e.beta || 0;
+          targetX = (gamma / 30) * 0.8;
+          targetY = ((beta - 45) / 30) * 0.6;
+        });
+
+        function gyroLoop() {
+          currentX += (targetX - currentX) * 0.08;
+          currentY += (targetY - currentY) * 0.08;
+          images.forEach((img, i) => {
+            const depth = 0.1 + (i / images.length) * 0.2;
+            const moveX = currentX * 20 * depth;
+            const moveY = currentY * 20 * depth;
+            gsap.set(img, {
+              x: moveX,
+              y: parseFloat(img.style.y || 0) + moveY * 0.1,
+              overwrite: 'auto'
+            });
+          });
+          requestAnimationFrame(gyroLoop);
+        }
+        gyroLoop();
+      }
+
+      // ---- PARALLAX HERO IMAGES ----
+      const heroImages = document.querySelectorAll('#parallax-hero img');
+      document.addEventListener('mousemove', (e) => {
+        const x = (e.clientX / window.innerWidth - 0.5) * 2;
+        const y = (e.clientY / window.innerHeight - 0.5) * 2;
+        heroImages.forEach((img, index) => {
+          const depth = 0.05 + (index / heroImages.length) * 0.2;
+          const moveX = x * 40 * depth,
+            moveY = y * 40 * depth;
+          const rotation = img.dataset.rotation || 0;
+          gsap.to(img, { transform: `translate(${moveX}px, ${moveY}px) rotate(${rotation}deg)`, duration: 0.1,
+            overwrite: 'auto', ease: "power1.out" });
+        });
+      });
+      heroImages.forEach((img) => {
+        const style = window.getComputedStyle(img);
+        const rotation = style.transform ? parseFloat(style.transform.split('(')[1]) : 0;
+        img.dataset.rotation = rotation || 0;
+      });
+
+      // ---- SERVICES ----
+      gsap.utils.toArray(".service-word").forEach((el, i) => {
+        const delay = i * 0.1;
+        gsap.from(el, {
+          opacity: 0,
+          y: 60,
+          rotation: i % 2 === 0 ? -5 : 5,
+          duration: 1,
+          delay: delay,
+          scrollTrigger: { trigger: el, start: "top 85%", toggleActions: "play reverse play reverse" }
+        });
+      });
+
+      // ---- PARALLAX SECTIONS ----
+      function setupParallax(sectionId, distance = -120) {
+        const parent = document.querySelector(`#${sectionId} .parallax-parent`);
+        if (!parent) return;
+        const child = parent.querySelector('.parallax-child');
+        if (!child) return;
+        gsap.to(child, { y: distance, ease: "none", scrollTrigger: { trigger: `#${sectionId}`, start: "top bottom",
+            end: "bottom top", scrub: 1 } });
+      }
+      ['hero', 'about', 'creators', 'campaigns', 'services', 'join-creator', 'join-brand', 'contact', 'privacy']
+        .forEach(id => setupParallax(id, -80));
+
+      // ---- SMOOTH SCROLL BUTTONS ----
+      document.querySelectorAll('button[data-target]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-target');
+          if (targetId) {
+            const target = document.getElementById(targetId);
+            if (target) lenis.scrollTo(target, { offset: 0, duration: 1.5 });
+          }
+        });
+      });
+
+      // ---- FLOATING OBJECTS ----
+      document.querySelectorAll('.float-object, .hero-float').forEach((obj, i) => {
+        const duration = 3 + Math.random() * 4;
+        const yOffset = 8 + Math.random() * 20;
+        const rot = (Math.random() - 0.5) * 2;
+        gsap.to(obj, { y: yOffset, rotation: rot, duration, repeat: -1, yoyo: true, ease: "sine.inOut", delay: i *
+            0.2 });
+      });
+
+      // ---- CLEANUP ----
+      window.addEventListener('beforeunload', () => {
+        ScrollTrigger.getAll().forEach(st => st.kill());
+        gsap.killTweensOf("*");
+        if (idleAnim) idleAnim.kill();
+        trailElements.forEach(t => t.remove());
+      });
+      window.addEventListener('load', () => { ScrollTrigger.refresh();
+        loaderTL.play(); });
+      loaderTL.play();
+       // ---- CLICKABLE CAMPAIGN CARDS ----
+      document.querySelectorAll('[data-href]').forEach(el => {
+        el.addEventListener('click', (e) => {
+          // Prevent if clicking on a child that might have its own action (like a dock icon)
+          if (e.target.closest('.dock-icon')) return;
+          const url = el.getAttribute('data-href');
+          if (url) window.open(url, '_blank');
+        });
+      });
+
+
+    })();
+
+    // ---- CONTACT FORM (AJAX) ----
+    const contactForm = document.getElementById('contact-form');
+    const formFields = document.getElementById('form-fields');
+    const formStatus = document.getElementById('form-status');
+    const submitBtn = document.getElementById('submit-btn');
+
+    if (contactForm) {
+      contactForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        submitBtn.textContent = 'Sending...';
+        submitBtn.disabled = true;
+
+        const formData = new FormData(contactForm);
+
+        try {
+          const response = await fetch(contactForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            formFields.style.display = 'none';
+            formStatus.style.display = 'block';
+          } else {
+            submitBtn.textContent = 'Error – try again';
+            submitBtn.disabled = false;
+            setTimeout(() => {
+              submitBtn.textContent = 'Send Message';
+            }, 3000);
+          }
+        } catch (error) {
+          submitBtn.textContent = 'Network error – try again';
+          submitBtn.disabled = false;
+          setTimeout(() => {
+            submitBtn.textContent = 'Send Message';
+          }, 3000);
+        }
+      });
+    }
+
+    // ---- MOBILE CAROUSEL DOTS ----
+    function initCarouselDots() {
+      document.querySelectorAll('.carousel-dots').forEach(dotsContainer => {
+        const carouselId = dotsContainer.dataset.carousel;
+        const grid = document.querySelector(`#${carouselId} .grid`);
+        if (!grid) return;
+
+        const cards = grid.querySelectorAll('.comet-card, .campaign-comet-card');
+        if (cards.length <= 1) return;
+
+        dotsContainer.innerHTML = '';
+        cards.forEach((_, i) => {
+          const dot = document.createElement('span');
+          dot.className = 'dot' + (i === 0 ? ' active' : '');
+          dot.dataset.index = i;
+          dot.addEventListener('click', () => {
+            const cardWidth = grid.offsetWidth * 0.85 + 16;
+            grid.scrollTo({
+              left: i * cardWidth,
+              behavior: 'smooth'
+            });
+          });
+          dotsContainer.appendChild(dot);
+        });
+
+        grid.addEventListener('scroll', () => {
+          const scrollLeft = grid.scrollLeft;
+          const cardWidth = grid.offsetWidth * 0.85 + 16;
+          const index = Math.round(scrollLeft / cardWidth);
+          const dots = dotsContainer.querySelectorAll('.dot');
+          dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === index);
+          });
+        });
+
+        window.addEventListener('resize', () => {
+          const scrollLeft = grid.scrollLeft;
+          const cardWidth = grid.offsetWidth * 0.85 + 16;
+          const index = Math.round(scrollLeft / cardWidth);
+          const dots = dotsContainer.querySelectorAll('.dot');
+          dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === index);
+          });
+        });
+      });
+    }
+    initCarouselDots();
+  </script>
+</body>
+</html>
