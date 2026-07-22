@@ -942,11 +942,20 @@
       transform: scale(0.95);
     }
     .hero-logo {
-      width: 100%;
-      max-width: clamp(120px, 18vw, 280px);
-      flex-shrink: 0;
-      margin-top: clamp(0rem, 0.5vh, 0.5rem);
-    }
+  width: 100%;
+  max-width: clamp(120px, 18vw, 280px);
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+/* Desktop only – moves logo up without pulling text */
+@media (min-width: 769px) {
+  .hero-logo {
+    max-width: clamp(100px, 12vw, 180px);
+    position: relative;
+    top: -2.5rem;   /* adjust this value – more negative = higher */
+  }
+}
     .hero-logo img { width: 100%; height: auto; display: block; }
 
     .hero-slogan-block {
