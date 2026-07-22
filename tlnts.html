@@ -716,15 +716,16 @@
       will-change: transform;
       box-shadow: 0 20px 60px rgba(24,0,173,0.3);
       border: 2px solid rgba(255,255,255,0.05);
+      touch-action: none;
     }
     /* Adjust floating images for mobile – fewer, smaller */
     .parallax-hero img:nth-child(1) { top: 12%; left: 4%; width: 200px; height: 140px; transform: rotate(-3deg); }
     .parallax-hero img:nth-child(2) { top: 28%; right: 6%; width: 180px; height: 120px; transform: rotate(4deg); }
     .parallax-hero img:nth-child(3) { bottom: 22%; left: 8%; width: 220px; height: 150px; transform: rotate(2deg); }
     .parallax-hero img:nth-child(4) { bottom: 32%; right: 10%; width: 160px; height: 110px; transform: rotate(-5deg); }
-    .parallax-hero img:nth-child(5) { top: 50%; left: 25%; width: 190px; height: 130px; transform: rotate(6deg); }
-    .parallax-hero img:nth-child(6) { top: 6%; left: 42%; width: 140px; height: 100px; transform: rotate(-2deg); }
-    .parallax-hero img:nth-child(7) { bottom: 12%; right: 35%; width: 210px; height: 140px; transform: rotate(3deg); }
+    .parallax-hero img:nth-child(5) { top: 30%; left: 15%; width: 190px; height: 130px; transform: rotate(6deg); }
+    .parallax-hero img:nth-child(6) { top: 6%; left: 22%; width: 190px; height: 130px; transform: rotate(-2deg); }
+    .parallax-hero img:nth-child(7) { bottom: 12%; right: 15%; width: 210px; height: 140px; transform: rotate(3deg); }
 
     /* ===== MOBILE BREAKPOINT FIXES (corrected) ===== */
 
@@ -944,7 +945,7 @@
       width: 100%;
       max-width: clamp(120px, 18vw, 280px);
       flex-shrink: 0;
-      margin-top: clamp(0.2rem, 1vh, 1.5rem);
+      margin-top: clamp(0rem, 0.5vh, 0.5rem);
     }
     .hero-logo img { width: 100%; height: auto; display: block; }
 
@@ -1563,8 +1564,6 @@
               <div class="pop-text-sub">Guitarist · Streamer</div>
             </div>
             <div class="card-footer">
-              <div>TLNTS CREATOR</div>
-              <div class="card-id">#T001</div>
             </div>
             <div class="card-dock-overlay">
               <a href="https://www.instagram.com/bikirannn_/" class="dock-icon"><i class="fab fa-instagram"></i></a>
@@ -1583,8 +1582,6 @@
               <div class="pop-text-sub">VARIETY STREAMER</div>
             </div>
             <div class="card-footer">
-              <div>TLNTS CREATOR</div>
-              <div class="card-id">#T002</div>
             </div>
             <div class="card-dock-overlay">
               <a href="https://www.instagram.com/kwwanzo/" target="_blank" class="dock-icon">
@@ -2384,6 +2381,7 @@
             ease: "sine.inOut",
             delay: delay
           });
+          img._floatTimeline = tl;
           tl.to(img, {
             y: yFloat,
             rotationX: rotX,
@@ -2447,6 +2445,7 @@
         const x = (e.clientX / window.innerWidth - 0.5) * 2;
         const y = (e.clientY / window.innerHeight - 0.5) * 2;
         heroImages.forEach((img, index) => {
+          if (img._dragActive) return;
           const depth = 0.05 + (index / heroImages.length) * 0.2;
           const moveX = x * 40 * depth,
             moveY = y * 40 * depth;
@@ -2460,7 +2459,87 @@
         const rotation = style.transform ? parseFloat(style.transform.split('(')[1]) : 0;
         img.dataset.rotation = rotation || 0;
       });
+      // ---- TOUCH DRAG FOR HERO IMAGES (mobile only) ----
+if ('ontouchstart' in window) {
+  const images = document.querySelectorAll('#parallax-hero img');
+  let activeImage = null;
+  let startX, startY, origX, origY, origRot;
+  let holdTimer;
 
+  const originalTransforms = new Map();
+
+  images.forEach((img) => {
+    originalTransforms.set(img, img.style.transform || '');
+
+    img.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+
+      const currentTransform = img.style.transform || '';
+      const translateMatch = currentTransform.match(/translate\(([^)]+)\)/);
+      if (translateMatch) {
+        const parts = translateMatch[1].split(',').map(s => parseFloat(s.trim()));
+        origX = parts[0] || 0;
+        origY = parts[1] || 0;
+      } else {
+        origX = 0;
+        origY = 0;
+      }
+      const rotMatch = currentTransform.match(/rotate\(([^)]+)\)/);
+      origRot = rotMatch ? parseFloat(rotMatch[1]) : 0;
+
+      holdTimer = setTimeout(() => {
+        activeImage = img;
+        img._dragActive = true;
+        if (img._floatTimeline) img._floatTimeline.pause();
+        img.style.transition = 'none';
+        img.style.boxShadow = '0 0 30px rgba(250,208,44,0.6)';
+      }, 300);
+    }, { passive: true });
+
+    img.addEventListener('touchmove', (e) => {
+      if (!activeImage) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+      activeImage.style.transform = `translate(${origX + dx}px, ${origY + dy}px) rotate(${origRot}deg)`;
+    }, { passive: false });
+
+    img.addEventListener('touchend', () => {
+      clearTimeout(holdTimer);
+      if (activeImage) {
+        activeImage.style.boxShadow = '';
+        activeImage._dragActive = false;
+        activeImage = null;
+      }
+    });
+
+    img.addEventListener('touchcancel', () => {
+      clearTimeout(holdTimer);
+      if (activeImage) {
+        activeImage.style.boxShadow = '';
+        activeImage._dragActive = false;
+        activeImage = null;
+      }
+    });
+
+    let lastTap = 0;
+    img.addEventListener('touchend', () => {
+      const now = Date.now();
+      if (now - lastTap < 300 && activeImage === null) {
+        const original = originalTransforms.get(img) || '';
+        img.style.transform = original;
+        if (img._floatTimeline) {
+          img._floatTimeline.restart();
+          img._floatTimeline.play();
+        }
+      }
+      lastTap = now;
+    });
+  });
+}
       // ---- SERVICES ----
       gsap.utils.toArray(".service-word").forEach((el, i) => {
         const delay = i * 0.1;
