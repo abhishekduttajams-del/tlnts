@@ -129,12 +129,30 @@
     }
     #cursor-svg path {
       fill: none;
-      stroke: #ffffff;
       stroke-width: 3.5;
       stroke-linecap: round;
       stroke-linejoin: round;
       transition: stroke-width 0.25s ease;
     }
+    /* Cursor colors based on section */
+    body.cursor-hero-dark #cursor-svg path {
+      stroke: #1800AD !important;
+    }
+    body.cursor-hero-light #cursor-svg path {
+      stroke: #ffffff !important;
+    }
+    /* Default is dark (hero) */
+    body {
+      cursor-hero-dark: initial; /* fallback */
+    }
+    body:not(.cursor-hero-light) #cursor-svg path {
+      stroke: #1800AD !important;
+    }
+    /* Override for light mode when class is set */
+    body.cursor-hero-light #cursor-svg path {
+      stroke: #ffffff !important;
+    }
+
     #cursor-glow {
       position: absolute;
       top: 50%;
@@ -150,7 +168,11 @@
       pointer-events: none;
       opacity: 0;
     }
-    #cursor.hover #cursor-glow { opacity: 0.4; background: rgba(24,0,173,0.4); }
+    /* Glow colors matching cursor */
+    body.cursor-hero-dark #cursor.hover #cursor-glow { background: rgba(24,0,173,0.4); }
+    body.cursor-hero-light #cursor.hover #cursor-glow { background: rgba(255,255,255,0.2); }
+
+    #cursor.hover #cursor-glow { opacity: 0.4; }
     #cursor.hover #cursor-svg { filter: drop-shadow(0 0 25px rgba(24,0,173,0.3)); }
     #cursor.hover #cursor-svg path { stroke-width: 4; }
     #cursor.click #cursor-svg { transition: filter 0.1s ease; }
@@ -169,13 +191,13 @@
     }
     .cursor-trail svg path {
       fill: none;
-      stroke: #ffffff;
       stroke-width: 2.5;
       stroke-linecap: round;
       stroke-linejoin: round;
+      stroke: #ffffff; /* trail always white? We'll keep white for consistency */
     }
     /* Hide custom cursor on touch devices */
-        @media (max-width: 768px) {
+    @media (max-width: 768px) {
       /* Cursor and toggle are now visible on mobile */
       body { cursor: auto !important; }
       a, button, .comet-card, .contact-input { cursor: pointer !important; }
@@ -366,7 +388,7 @@
       -ms-user-select: none;
     }
 
-    /* ===== BACKGROUND LAYERS ===== */
+    /* ===== BACKGROUND LAYERS (global, untouched) ===== */
     .bg-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
     .bg-layer-1 { background: var(--ink-black); }
     .bg-layer-2 { background: radial-gradient(circle at 40% 20%, rgba(24,0,173,0.35) 0%, transparent 60%); }
@@ -375,7 +397,6 @@
     .bg-layer-5 { opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 256px 256px; }
     .bg-blob { position: fixed; width: 700px; height: 700px; border-radius: 50%; background: rgba(24,0,173,0.06); filter: blur(150px); top: 10%; left: 20%; z-index: 0; pointer-events: none; will-change: transform; }
     .bg-blob-2 { position: fixed; width: 500px; height: 500px; border-radius: 50%; background: rgba(0,47,167,0.05); filter: blur(120px); bottom: 10%; right: 20%; z-index: 0; pointer-events: none; will-change: transform; }
-
 
     /* ===== FLOATING OBJECTS ===== */
     .float-object { position: fixed; pointer-events: none; z-index: 2; font-size: 3rem; opacity: 0.15; will-change: transform; user-select: none; }
@@ -408,9 +429,9 @@
       box-shadow: 0 15px 60px rgba(24,0,173,0.5);
     }
     .btn-secondary {
-      background: transparent;
-      color: var(--paper-white);
-      border: 1px solid rgba(250,208,44,0.4);
+      background: white;
+      color: #1800AD;
+      border: 2px solid #1800AD;
       transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
       position: relative;
       overflow: hidden;
@@ -420,17 +441,17 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: #fad02c;
+      background: #1800AD;
       opacity: 0;
       transition: opacity 0.4s ease;
       z-index: -1;
     }
     .btn-secondary:hover {
-      background: #fad02c;
-      color: var(--ink-black);
-      border-color: #fad02c;
+      background: #1800AD;
+      color: white;
+      border-color: #1800AD;
       transform: scale(1.05);
-      box-shadow: 0 10px 40px rgba(250,208,44,0.3);
+      box-shadow: 0 10px 40px rgba(24,0,173,0.3);
     }
     .btn-secondary:hover::after { opacity: 1; }
     .magnetic-btn { will-change: transform; transition: transform 0.15s cubic-bezier(0.23, 1, 0.32, 1); cursor: none !important; }
@@ -714,8 +735,8 @@
       border-radius: 16px;
       object-fit: cover;
       will-change: transform;
-      box-shadow: 0 20px 60px rgba(24,0,173,0.3);
-      border: 2px solid rgba(255,255,255,0.05);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      border: 2px solid rgba(255,255,255,0.3);
       touch-action: none;
     }
     /* Adjust floating images for mobile – fewer, smaller */
@@ -904,7 +925,7 @@
     @media (max-width: 640px) { #sound-btn { width: 48px; height: 48px; font-size: 1.25rem; } #sound-toggle { bottom: 16px; right: 16px; } }
 
     /* ============================================================ */
-    /* HERO – FULLY RESPONSIVE LAYOUT */
+    /* HERO – WHITE BACKGROUND WITH FLOATING IMAGES */
     /* ============================================================ */
     #hero {
       position: relative;
@@ -917,16 +938,37 @@
       overflow: visible;
       background: transparent;
     }
-    .hero-bg-layer {
+
+    /* White overlay – lowest layer */
+    #hero .hero-overlay {
       position: absolute;
       inset: 0;
-      z-index: 0;
+      background: #ffffff !important;
+      z-index: 0 !important;
+    }
+
+    /* Hero bg layer – above overlay */
+    #hero .hero-bg-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 1 !important;
       pointer-events: none;
       overflow: hidden;
     }
-    .hero-content {
+
+    /* Parallax floating images – above bg layer */
+    #hero .parallax-hero {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 2 !important;
+    }
+
+    /* Hero content – above everything */
+    #hero .hero-content {
       position: relative;
-      z-index: 10;
+      z-index: 10 !important;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -941,21 +983,35 @@
       opacity: 0;
       transform: scale(0.95);
     }
-    .hero-logo {
-  width: 100%;
-  max-width: clamp(120px, 18vw, 280px);
-  flex-shrink: 0;
-  margin-top: 0;
-}
 
-/* Desktop only – moves logo up without pulling text */
-@media (min-width: 769px) {
-  .hero-logo {
-    max-width: clamp(100px, 12vw, 180px);
-    position: relative;
-    top: -2.5rem;   /* adjust this value – more negative = higher */
-  }
-}
+    /* Hide all hero glows (no gradients, no blobs) */
+    #hero .hero-glow {
+      display: none !important;
+    }
+
+    /* Hero text – dark on white */
+    .hero-prefix {
+      color: #000000 !important;
+    }
+    .hero-scroll-indicator {
+      color: #000000 !important;
+    }
+    .hero-keyword {
+      color: #fad02c !important;
+    }
+
+    /* Adjust floating image shadows for white background */
+    #hero .parallax-hero img {
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      border-color: rgba(0,0,0,0.1);
+    }
+
+    .hero-logo {
+      width: 100%;
+      max-width: clamp(120px, 18vw, 280px);
+      flex-shrink: 0;
+      margin-top: 0;
+    }
     .hero-logo img { width: 100%; height: auto; display: block; }
 
     .hero-slogan-block {
@@ -974,7 +1030,6 @@
       text-transform: uppercase;
       font-size: clamp(16px, 2.6vw, 44px);
       line-height: 1.1;
-      color: #ffffff;
       margin-bottom: clamp(0.05rem, 0.2vh, 0.2rem);
     }
     @media (min-width: 768px) { .hero-prefix { font-size: clamp(22px, 3vw, 52px); } }
@@ -986,7 +1041,6 @@
       text-transform: uppercase;
       font-size: clamp(36px, 8vw, 130px);
       line-height: 0.85;
-      color: #fad02c;
       margin-top: clamp(-4px, -0.5vh, -10px);
     }
     @media (min-width: 768px) { .hero-keyword { font-size: clamp(48px, 9vw, 150px); margin-top: clamp(-6px, -0.6vh, -12px); } }
@@ -1040,7 +1094,6 @@
       left: 50%;
       transform: translateX(-50%);
       z-index: 20;
-      color: #ffffff;
       font-size: clamp(0.5rem, 0.8vw, 0.8rem);
       letter-spacing: 0.3em;
       font-family: 'Hitchcut', 'Bebas Neue', 'Inter', sans-serif;
@@ -1050,6 +1103,15 @@
       white-space: nowrap;
       pointer-events: none;
       opacity: 0;
+    }
+
+    /* Desktop logo override – smaller, higher */
+    @media (min-width: 769px) {
+      .hero-logo {
+        max-width: clamp(100px, 12vw, 180px);
+        position: relative;
+        top: -2.5rem;
+      }
     }
 
     /* ===== SECTION FADE-IN ===== */
@@ -1216,7 +1278,7 @@
       cursor: none !important;
     }
 
-    /* ===== CURSOR TOGGLE BUTTON SVG ===== */
+    /* ===== CURSOR TOGGLE BUTTON SVG – inverted for white hero ===== */
     #cursor-icon-svg {
       transition: stroke 0.3s ease;
     }
@@ -1225,13 +1287,13 @@
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      color: #ffffff;
+      color: #000000;
       margin-top: 1px;
       transition: color 0.3s ease;
       font-family: 'Space Grotesk', sans-serif;
     }
     #cursor-btn .cursor-label.pip-label {
-      color: #fad02c;
+      color: #ffffff;
     }
     #cursor-btn .cursor-label.original-label {
       color: #ffffff;
@@ -1443,7 +1505,7 @@
     </div>
   </div>
 
-  <!-- ===== BACKGROUND LAYERS ===== -->
+  <!-- ===== BACKGROUND LAYERS (global, untouched) ===== -->
   <div class="bg-layer bg-layer-1"></div>
   <div class="bg-layer bg-layer-2"></div>
   <div class="bg-layer bg-layer-3"></div>
@@ -1476,7 +1538,11 @@
 
     <!-- ===== HERO ===== -->
     <section id="hero" class="relative w-full" style="background: transparent;">
+      <!-- White overlay – lowest layer -->
+      <div class="hero-overlay"></div>
+
       <div class="hero-bg-layer">
+        <!-- Glows are hidden via CSS, but we keep the divs for structure -->
         <div class="hero-glow hero-glow-1" id="glow1"></div>
         <div class="hero-glow hero-glow-2" id="glow2"></div>
         <div class="hero-glow hero-glow-3" id="glow3"></div>
@@ -2022,6 +2088,24 @@
         initSectionFades();
         initMobileHeroFloat();
         initGyroscopeParallax();
+
+        // ---- Cursor color based on scroll ----
+        // Initially, hero is visible, so cursor is dark (default).
+        // When hero leaves viewport, switch to light (white).
+        ScrollTrigger.create({
+          trigger: "#hero",
+          start: "bottom top",
+          onLeave: () => {
+            document.body.classList.remove('cursor-hero-dark');
+            document.body.classList.add('cursor-hero-light');
+          },
+          onEnterBack: () => {
+            document.body.classList.remove('cursor-hero-light');
+            document.body.classList.add('cursor-hero-dark');
+          }
+        });
+        // Ensure initial state is dark (hero visible)
+        document.body.classList.add('cursor-hero-dark');
       }
 
       // ---- DIALOG EVENT LISTENERS ----
@@ -2358,13 +2442,14 @@
       // ---- HERO ENTRANCE ----
       function startMainHeroAnimation() {
         const heroContent = document.getElementById('hero-content');
+        // Glows are hidden, but we still animate them for consistency (they are hidden anyway)
         const glow1 = document.getElementById('glow1');
         const glow2 = document.getElementById('glow2');
         const glow3 = document.getElementById('glow3');
         const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
-        tl.to(glow1, { opacity: 1, duration: 0.3, delay: 0.05 })
-          .to(glow2, { opacity: 1, duration: 0.3, delay: 0 }, "-=0.2")
-          .to(glow3, { opacity: 1, duration: 0.4, delay: 0 }, "-=0.2")
+        tl.to(glow1, { opacity: 0, duration: 0.1, delay: 0.05 }) // ensure hidden
+          .to(glow2, { opacity: 0, duration: 0.1, delay: 0 }, "-=0.2")
+          .to(glow3, { opacity: 0, duration: 0.1, delay: 0 }, "-=0.2")
           .to(heroContent, { opacity: 1, scale: 1, duration: 0.4, delay: 0 })
           .from("#hero-logo-img", { y: -30, scale: 0.8, duration: 0.4, ease: "back.out(1.7)" }, "-=0.2")
           .from("#who-text", { scale: 0.3, opacity: 0, duration: 0.4, ease: "power4.out" }, "-=0.1")
