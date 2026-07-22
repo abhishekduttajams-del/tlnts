@@ -198,9 +198,7 @@ https://abhishekduttajams-del.github.io/tlnts/tlnts.html
 The project can be deployed using:
 
 - GitHub Pages
-- Netlify
 - Vercel
-- Cloudflare Pages
 
 ---
 
