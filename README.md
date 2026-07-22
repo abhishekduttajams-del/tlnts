@@ -112,26 +112,6 @@ The mobile version preserves the desktop experience through carefully redesigned
 - Glow Effects
 - Smooth Section Reveals
 
----
-
-# 📂 Project Structure
-
-```
-TLNTS/
-│
-├── index.html
-├── assets/
-│
-├── images/
-│
-├── fonts/
-│
-├── icons/
-│
-└── README.md
-```
-
----
 
 # ⚡ Performance
 
