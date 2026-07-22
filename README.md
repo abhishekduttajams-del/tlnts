@@ -183,13 +183,15 @@ Open
 http://localhost:8000
 ```
 
----
+
 
 How to Access the HTML page
 
 ```
 https://abhishekduttajams-del.github.io/tlnts/tlnts.html
 ```
+
+---
 
 # 🌍 Deployment
 
